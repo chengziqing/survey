@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html  ng-app="ionicApp">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+    <script src="js/app.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=QUPz8vKFmA2XY75r6aSa62jn&v=1.0"></script>
+  </head>
+  <body>
+    <ion-nav-bar class="nav-title-slide-ios7 bar-positive">
+      <ion-nav-back-button class="button-icon ion-arrow-left-c">
+      </ion-nav-back-button>
+    </ion-nav-bar>
+    <ion-nav-view animation="slide-left-right"></ion-nav-view>
+    <script id="facts2.html" type="text/ng-template">
+      <ion-view title="基站1勘察项目">
+        <ion-content>
+            <div class="list card">
+                <a href="#/tab/checkin" class="item item-icon-left"> <i class="icon ion-ios7-telephone"></i>
+                    现场签到
+                </a>
+                <a href="#/tab/form" class="item item-icon-left">
+                    <i class="icon ion-wifi"></i>
+                    信息采集
+                </a>
+                <a href="#" class="item item-icon-left">
+                    <i class="icon ion-card"></i>
+                    图片采集
+                </a>
+            </div>
+                <div class="list card">
+                <a href="#/tab/checkin" class="item item-icon-left"> <i class="icon ion-ios7-telephone"></i>
+                    信息沟通
+                </a>
+            </div>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <script id="checkin.html" type="text/ng-template">
+      <ion-view title="签到">
+        <ion-content>
+            <div id="map" data-tap-disabled="true"></div>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <script id="form.html" type="text/ng-template">
+      <ion-view title="表单">
+        <ion-content>
+            <div class="list card">
+                <a class="item" ng-repeat="item in items" href="#/tab/baseform">{{item}}</a>
+            </div>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <script id="baseform.html" type="text/ng-template">
+      <ion-view title="表单">
+        <ion-content>
+            <label class="item item-input">
+                <span class="input-label">姓名</span>
+                <input type="text"></label>
+            <label class="item item-input">
+                <span class="input-label">家庭住址</span>
+                <input type="text"></label>
+            <div class="item item-divider">网络信息</div>
+            <li class="item item-checkbox">
+                <label class="checkbox">
+                    <input type="checkbox"></label>
+                是否漏电
+            </li>
+            <li class="item item-checkbox">
+                <label class="checkbox">
+                    <input type="checkbox"></label>
+                是否有网
+            </li>
+            <div class="item item-divider">路由厂家</div>
+              <label class="item item-radio">
+                <input type="radio" name="group">
+                <div class="item-content">
+                  Go
+                </div>
+                <i class="radio-icon ion-checkmark"></i>
+              </label>
+                            <label class="item item-radio">
+                <input type="radio" name="group">
+                <div class="item-content">
+                  Go
+                </div>
+                <i class="radio-icon ion-checkmark"></i>
+              </label>
+<ion-toggle ng-model="airplaneMode" toggle-class="toggle-calm">Airplane Mode</ion-toggle>
+  <label class="item item-input item-select">
+    <div class="input-label">
+      Lightsaber
+    </div>
+    <select>
+      <option>Blue</option>
+      <option selected>Green</option>
+      <option>Red</option>
+    </select>
+  </label>
+        </ion-content>
+      </ion-view>
+    </script>
+  </body>
+</html>
