@@ -1,6 +1,6 @@
 angular.module('ionicApp', ['ionic'])
-.config(function($stateProvider, $urlRouterProvider) {
-
+.config(function($stateProvider, $urlRouterProvider,$ionicConfigProvider) {
+  $ionicConfigProvider.
   $stateProvider
     .state('tabs', {
       url: "/tab",
@@ -43,11 +43,12 @@ angular.module('ionicApp', ['ionic'])
         }
       }
     })
-    .state('tabs.facts2', {
-      url: "/facts2",
+    .state('tabs.content', {
+      url: "/content",
       views: {
         'working-tab': {
-          templateUrl: "facts2.html"
+          templateUrl: "templates/content.html",
+          controller: 'ContentTabCtrl'
         }
       }
     })
@@ -55,7 +56,7 @@ angular.module('ionicApp', ['ionic'])
       url: "/checkin",
       views: {
         'working-tab': {
-          templateUrl: "checkin.html",
+          templateUrl: "templates/checkin.html",
           controller: 'CheckinTabCtrl'
         }
       }
@@ -64,7 +65,7 @@ angular.module('ionicApp', ['ionic'])
       url: "/form",
       views: {
         'working-tab': {
-          templateUrl: "form.html",
+          templateUrl: "templates/form.html",
           controller: 'FormTabCtrl'
         }
       }
@@ -73,13 +74,12 @@ angular.module('ionicApp', ['ionic'])
       url: "/baseform",
       views: {
         'working-tab': {
-          templateUrl: "baseform.html",
+          templateUrl: "templates/baseform.html",
           controller: 'BaseFormTabCtrl'
         }
       }
     });
    $urlRouterProvider.otherwise("/tab/working");
-
 })
 .controller('WaitTabCtrl', function($scope, $timeout) {
   console.log('WaitTabCtrl');
@@ -109,17 +109,56 @@ angular.module('ionicApp', ['ionic'])
     }, 500);
   };
 })
+.controller('ContentTabCtrl',function($scope,$timeout,$http){
+  console.log('ContentTabCtrl');
+})
 .controller('CheckinTabCtrl',function($scope,$timeout){
   console.log('CheckinTabCtrl');
   var map = new BMap.Map("map");            // 创建Map实例
   var point = new BMap.Point(116.404, 39.915); // 创建点坐标
   map.centerAndZoom(point,15);                 // 初始化地图,设置中心点坐标和地图级别。
-  map.addControl(new BMap.ZoomControl());      //添加地图缩放控件
-  console.log('CheckinTabCtrl123');
+
+  // 定义一个控件类，即function 
+  function LocationControl(){      
+      // 设置默认停靠位置和偏移量    
+      this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;      
+      this.defaultOffset = new BMap.Size(10, 10);      
+  }
+  // 通过JavaScript的prototype属性继承于BMap.Control  
+  LocationControl.prototype = new BMap.Control();
+  // 自定义控件必须实现initialize方法，并且将控件的DOM元素返回     
+  // 在本方法中创建个div元素作为控件的容器，并将其添加到地图容器中     
+  LocationControl.prototype.initialize = function(map) {
+    // 创建一个DOM元素     
+    var div = document.createElement("div");
+    // 设置样式      
+    div.style.cursor = "pointer";
+    div.style.width = "36px";
+    div.style.height = "36px";
+    div.style.background = "url(img/location.png) -324px 0px no-repeat";
+    // 绑定事件，点击一次放大两级      
+    div.onclick = function(e) {
+        console.log('重新定位');
+      }
+      // 添加DOM元素到地图中     
+    map.getContainer().appendChild(div);
+    return div;
+  }
+
+  var myLocationControl = new LocationControl();      
+  // 添加到地图当中      
+  map.addControl(myLocationControl); 
 })
 .controller('FormTabCtrl',function($scope,$timeout){
   console.log('FormTabCtrl');
   $scope.items = ['基本信息', '电源信息', '网络信息'];
+})
+.controller('NavBarCtrl',function($scope,$ionicHistory){
+  console.log('NavBarCtrl');
+  $scope.ClearCacheGoBack = function() {
+    $ionicHistory.clearCache();
+    $ionicHistory.goBack();
+  };
 })
 .controller('BaseFormTabCtrl',function($scope,$timeout){
   console.log('BaseFormTabCtrl');

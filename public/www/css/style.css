@@ -3,3 +3,7 @@
 .scroll {
   height: 100%;
 }
+/*百度地图隐藏logo*/
+.anchorBL{
+	display:none;
+}
