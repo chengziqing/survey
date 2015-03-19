@@ -5,6 +5,9 @@
 module:testrunner
 
 GET     /                                       App.Index
+GET     /GetUserInfo                            App.GetUserInfo
+GET     /GetItemList                            App.GetItemList
+GET     /GetItemSiteList                        App.GetItemSiteList
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

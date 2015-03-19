@@ -1,6 +1,11 @@
 angular.module('ionicApp', ['ionic'])
 .config(function($stateProvider, $urlRouterProvider,$ionicConfigProvider) {
-  $ionicConfigProvider.
+  $ionicConfigProvider.platform.android.tabs.position("bottom");
+  $ionicConfigProvider.tabs.style('standard');
+  $ionicConfigProvider.backButton.text('').icon('ion-ios7-arrow-thin-left');
+  $ionicConfigProvider.backButton.previousTitleText(true);
+  $ionicConfigProvider.navBar.alignTitle('center');
+
   $stateProvider
     .state('tabs', {
       url: "/tab",
@@ -84,9 +89,18 @@ angular.module('ionicApp', ['ionic'])
 .controller('WaitTabCtrl', function($scope, $timeout) {
   console.log('WaitTabCtrl');
 })
-.controller('WorkingTabCtrl',function($scope,$timeout){
+.controller('WorkingTabCtrl',function($scope,$http,$timeout){
   console.log('WorkingTabCtrl');
-  $scope.items = ['勘察任务1', '勘察任务2', '勘察任务3'];
+  //$scope.items = ['勘察任务1', '勘察任务2', '勘察任务3'];
+
+  $http.jsonp("/GetItemList?jsoncallback=JSON_CALLBACK").
+    success(function(data, status) {
+      $scope.items=data.root;
+    }).
+    error(function(data, status) {
+      console.log("error");
+    });
+
   $scope.doRefresh = function() {
     console.log('Refreshing!');
     $timeout( function() {
