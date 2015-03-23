@@ -1,0 +1,13 @@
+<ion-view title="信息类别">
+<ion-nav-buttons side="secondary">
+	<button class="button">提交表单</button>
+</ion-nav-buttons>
+<ion-content>
+    <div class="list card">
+        <a class="item item-icon-left item-icon-right" ng-repeat="item in items" href="#/tab/form">
+        <i class="icon ion-ios-folder"></i>
+        {{item.TypeName}} <i class="icon ion-arrow-right-c"></i>
+        </a>
+    </div>
+</ion-content>
+</ion-view>

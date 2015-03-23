@@ -1,18 +1,11 @@
-<ion-view title="勘察中">
+<ion-view title="勘察中任务">
 <ion-content>
  <ion-refresher on-refresh="doRefresh()"></ion-refresher>
-  <ion-list>
-      <ion-item ng-repeat="item in items" ng-href="#/tab/station?TaskId={{item.TaskId}}" style="padding:8px;">
-      	<div class="row" style="padding:0px;">
-      		<div class="col col-75">
-      			<h2>{{item.TaskName}}</h2>
-      			<p>2015-03-18</p>
-      		</div>
-      		<div class="col" style="text-align:right;">
-      			<a class="ion-chevron-right"><span class="badge badge-assertive">34</span></a>
-      		</div>
-      	</div>
-      </ion-item>
-  </ion-list>
+ <div class="list">
+   <a class="item" ng-repeat="item in items" ng-href="#/tab/station?TaskId={{item.TaskId}}">
+     {{item.TaskName}}
+     <span class="badge badge-assertive">{{item.Num}}</span>
+   </a>
+ </div>
 </ion-content>
 </ion-view>

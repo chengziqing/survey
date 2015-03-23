@@ -1,8 +1,10 @@
 <ion-view title="基站列表" class="padding">
 <ion-content>
-  <ion-refresher on-refresh="doRefresh()"></ion-refresher>
-  <ion-list>
-      <ion-item ng-repeat="item in items" href="#/tab/content">{{item}}</ion-item>
-  </ion-list>
+   <div class="list">
+   	<a class="item" ng-repeat="item in items" ng-href="#/tab/content?TaskId={{item.TaskId}}&ObjectId={{item.ObjectId}}">
+   		{{item.ObjectName}}
+   		<span class="item-note">{{item.Status | sitestatus}}</span>
+   	</a>
+   </div>
 </ion-content>
 </ion-view>

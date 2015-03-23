@@ -58,11 +58,20 @@ angular.module('ionicApp', ['ionic'])
       }
     })
     .state('tabs.checkin', {
-      url: "/checkin",
+      url: "/checkin/:TaskId/:SiteId",
       views: {
         'working-tab': {
           templateUrl: "templates/checkin.html",
           controller: 'CheckinTabCtrl'
+        }
+      }
+    })
+    .state('tabs.infotypes', {
+      url: "/infotypes/:TaskId",
+      views: {
+        'working-tab': {
+          templateUrl: "templates/infotypes.html",
+          controller: 'InfotypesTabCtrl'
         }
       }
     })
@@ -86,25 +95,66 @@ angular.module('ionicApp', ['ionic'])
     });
    $urlRouterProvider.otherwise("/tab/working");
 })
+.filter('sitestatus', function() {
+  return function(status) {
+    if (status == "00") {
+      return "待勘察";
+    }
+    if (status == "01") {
+      return "勘察中";
+    }
+    if (status == "02") {
+      return "已勘察";
+    }
+    if (status == "12") {
+      return "未勘察标记";
+    }
+    if (status == "22") {
+      return "作废标记";
+    }
+    return "未知状态";
+  };
+})
+.filter('signstatus', function() {
+  return function(status) {
+    if (status == "0") {
+      return "未签到";
+    }
+    if (status == "1") {
+      return "已签到";
+
+    }
+    return "未知状态";
+  };
+})
+.filter('collectstatus', function() {
+  return function(status) {
+    if (status == "0") {
+      return "未提交";
+    }
+    if (status == "1") {
+      return "已提交";
+    }
+  };
+})
 .controller('WaitTabCtrl', function($scope, $timeout) {
   console.log('WaitTabCtrl');
 })
 .controller('WorkingTabCtrl',function($scope,$http,$timeout){
   console.log('WorkingTabCtrl');
-  //$scope.items = ['勘察任务1', '勘察任务2', '勘察任务3'];
-
   $http.jsonp("/GetItemList?jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
     error(function(data, status) {
       console.log("error");
-    });
+  });
 
   $scope.doRefresh = function() {
     console.log('Refreshing!');
     $timeout( function() {
-      $scope.items.push('勘察任务' + Math.floor(Math.random() * 100) + 4);
+      var item ={TaskId:"10618694-4b9c-4a52-b210-f9cc0a1926be",TaskName:"勘察任务",Num:Math.floor(Math.random() * 100)};
+      $scope.items.push(item);
       $scope.$broadcast('scroll.refreshComplete');
     }, 500);
   };
@@ -114,24 +164,31 @@ angular.module('ionicApp', ['ionic'])
 })
 .controller('StationTabCtrl',function($scope,$timeout,$http){
   console.log('StationTabCtrl');
-  $scope.items = ['基站1', '基站2', '基站3'];
-  $scope.doRefresh = function() {
-    console.log('Refreshing!');
-    $timeout( function() {
-      $scope.items.push('基站' + Math.floor(Math.random() * 100) + 4);
-      $scope.$broadcast('scroll.refreshComplete');
-    }, 500);
-  };
+  $http.jsonp("/GetItemSiteList?jsoncallback=JSON_CALLBACK").
+    success(function(data, status) {
+      $scope.items=data.root;
+    }).
+    error(function(data, status) {
+      console.log("error");
+  });
 })
-.controller('ContentTabCtrl',function($scope,$timeout,$http){
+.controller('ContentTabCtrl',function($scope,$http){
   console.log('ContentTabCtrl');
+  $http.jsonp("/GetSiteAllStatus?jsoncallback=JSON_CALLBACK").
+    success(function(data, status) {
+      $scope.item=data.root[0];
+    }).
+    error(function(data, status) {
+      console.log("error");
+  });
 })
-.controller('CheckinTabCtrl',function($scope,$timeout){
+.controller('CheckinTabCtrl',function($scope,$stateParams){
   console.log('CheckinTabCtrl');
+  $scope.TaskId=$stateParams.TaskId;
+  $scope.SiteId=$stateParams.SiteId;
   var map = new BMap.Map("map");            // 创建Map实例
-  var point = new BMap.Point(116.404, 39.915); // 创建点坐标
+  var point = new BMap.Point(117.211405, 31.855289); // 创建点坐标
   map.centerAndZoom(point,15);                 // 初始化地图,设置中心点坐标和地图级别。
-
   // 定义一个控件类，即function 
   function LocationControl(){      
       // 设置默认停靠位置和偏移量    
@@ -149,23 +206,52 @@ angular.module('ionicApp', ['ionic'])
     div.style.cursor = "pointer";
     div.style.width = "36px";
     div.style.height = "36px";
-    div.style.background = "url(img/location.png) -324px 0px no-repeat";
+    div.style.background = "url(img/location.png) -288px 0px no-repeat";
+    div.onmouseover =function(e){
+      div.style.background = "url(img/location.png) -324px 0px no-repeat";
+    };
+    div.onmouseout =function(e){
+      div.style.background = "url(img/location.png) -288px 0px no-repeat";
+    };
     // 绑定事件，点击一次放大两级      
     div.onclick = function(e) {
         console.log('重新定位');
-      }
+        map.removeOverlay(marker1);
+        var marker2 = new BMap.Marker(point);
+        map.addOverlay(marker2);
+    };
       // 添加DOM元素到地图中     
     map.getContainer().appendChild(div);
     return div;
   }
-
   var myLocationControl = new LocationControl();      
   // 添加到地图当中      
   map.addControl(myLocationControl); 
+  var marker1 = new BMap.Marker(point);
+  map.addOverlay(marker1);
+
 })
-.controller('FormTabCtrl',function($scope,$timeout){
+.controller('InfotypesTabCtrl',function($scope,$http){
+  console.log('InfotypesTabCtrl');
+  $http.jsonp("/GetTaskInfoTypes?jsoncallback=JSON_CALLBACK").
+    success(function(data, status) {
+      $scope.items=data.root;
+    }).
+    error(function(data, status) {
+      console.log("error");
+  });
+
+})
+.controller('FormTabCtrl',function($scope,$http){
   console.log('FormTabCtrl');
-  $scope.items = ['基本信息', '电源信息', '网络信息'];
+  $http.jsonp("/GetTaskPropertys?jsoncallback=JSON_CALLBACK").
+    success(function(data, status) {
+      $scope.items=data.root;
+    }).
+    error(function(data, status) {
+      console.log("error");
+  });
+
 })
 .controller('NavBarCtrl',function($scope,$ionicHistory){
   console.log('NavBarCtrl');
@@ -174,6 +260,15 @@ angular.module('ionicApp', ['ionic'])
     $ionicHistory.goBack();
   };
 })
-.controller('BaseFormTabCtrl',function($scope,$timeout){
+.controller('BaseFormTabCtrl',function($scope,$http){
   console.log('BaseFormTabCtrl');
+  $scope.title="核讹咯";
+  $http.jsonp("/GetTaskPropertyControl?jsoncallback=JSON_CALLBACK").
+    success(function(data, status) {
+      $scope.item=data.root[0];
+    }).
+    error(function(data, status) {
+      console.log("error");
+  });
+
 });

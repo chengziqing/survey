@@ -13,6 +13,7 @@ func (c App) Index() revel.Result {
 	return c.Render()
 }
 
+//1、 获取用户信息
 func (c App) GetUserInfo(jsoncallback string) revel.Result {
 	jsonp := "%s(%s)"
 	json := `{
@@ -42,6 +43,7 @@ func (c App) GetUserInfo(jsoncallback string) revel.Result {
 	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
 }
 
+//2、 获取当前用户的任务列表
 func (c App) GetItemList(jsoncallback string) revel.Result {
 	jsonp := "%s(%s)"
 	json := `{
@@ -70,6 +72,7 @@ func (c App) GetItemList(jsoncallback string) revel.Result {
 	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
 }
 
+//3、获取任务下的站点列表
 func (c App) GetItemSiteList(jsoncallback string) revel.Result {
 	jsonp := "%s(%s)"
 	json := `{
@@ -103,6 +106,213 @@ func (c App) GetItemSiteList(jsoncallback string) revel.Result {
             "Num12": "0",
             "LNG_LAT": "117.231410,31.812190"
         }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//4、勘察站点的现场签到、信息采集、图片采集状态获取
+func (c App) GetSiteAllStatus(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "root": [{
+            "TaskId": "10618694-4b9c-4a52-b210-f9cc0a1926be",
+            "SiteId": "1ba7f44a-4342-4a74-a567-71289bc3e0e6",
+            "SignStatus": "1",
+            "CollectStatus": "1",
+            "PicTotalNum": 4,
+            "PicDoingNum": 2
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//5、勘察站点的现场签到信息
+func (c App) GetSiteSign(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "root": [{
+            "TaskId": "1",
+            "SiteId": "",
+            "SignLng": 121.1212,
+            "SignLat": 31.1212
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//5、任务下模板的业务类别获取
+func (c App) GetTaskInfoTypes(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "root": [{
+            "TaskId": "1",
+            "TypeID": "3",
+            TypeName: "基本信息"
+        }, {
+            "TaskId": "2",
+            "TypeID": "4",
+            TypeName: "网络信息"
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//6、任务/业务类别下信息属性名称获取
+func (c App) GetTaskPropertys(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "root": [{
+            "TaskId": "2",
+            "TypeID": "3",
+            "PropertyID": "1",
+            PropertylName: "基站名称",
+            "IsPropertyGroup": "0"
+        }, {
+            "TaskId": "2",
+            "TypeID": "3",
+            "PropertyID": "2",
+            PropertylName: "楼层情况",
+            "IsPropertyGroup": "1"
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//7 任务/业务类别下信息属性样式获取
+func (c App) GetTaskPropertyControl(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "root": [{
+            "TaskId": "1",
+            "TypeID": "",
+            "PropertyID": "1",
+            "PropertylName": "基站名称",
+            "ShowType": "0",
+            "ShowStyle": "0",
+            "PropertyValue": "",
+            "Defaults": "",
+            "Validator": "",
+            "MaxLength": ""
+
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//8 任务站点下往期任务列表获取(按时间倒序)
+func (c App) GetHistoryTask(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+    "totalCount": 1,
+        "root": [{
+            "SiteId": "",
+            "TaskId": "1",
+            "TaskName": "1"
+        }, {
+            "SiteId": "",
+            "TaskId": "1",
+            "TaskName": "1"
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//9 任务下往期信息属性值获取(要求本地存储)
+func (c App) GetHistoryPropertyValue(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "root": [{
+            "PropertyID": "1",
+            "PropertyInstance_Value": "站点1"
+        }, {
+            "PropertyID": "2",
+            "PropertyInstance_Value": "AHST_001"
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//10、任务下参与人员获取(姓名、手机号)  用于信息勾通
+func (c App) GetTaskMemberList(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "root": [{
+            "UserName": "1",
+            "Phone": ""
+        }, {
+            "UserName": "1",
+            "Phone": ""
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//11、获取站点目录信息
+func (c App) GetSiteDirectory(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "root": [{
+            "TaskId": "1",
+            "SiteId": "",
+            "DirectoryID": "1",
+            "DirectoryName": ""
+        }, {
+            "TaskId": "1",
+            "SiteId": "",
+            "DirectoryID": "1",
+            "DirectoryName": ""
+        }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//12、获取站点目录下的图片名称信息
+func (c App) GetSitePicName(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := ` {
+     "totalCount": 1,
+         "root": [{
+             "TaskId": "1",
+             "SiteId": "",
+             "DirectoryID": "1",
+             "DirectoryName": "",
+             "PicId": "",
+             "PicName": "",
+             "PicStatus": "",
+             "SmallPicPath": "",
+             "PicPath": ""
+         }, {
+             "TaskId": "1",
+             "SiteId": "",
+             "DirectoryID": "1",
+             "DirectoryName": "",
+             "PicId": "",
+             "PicName": "",
+             "PicStatus": "",
+             "SmallPicPath": "",
+             "PicPath": ""
+         }]
+    }`
+	c.Response.ContentType = "application/json;charset=utf-8"
+	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
+}
+
+//13、表单属性值上传
+func (c App) TaskFormDataUpload(jsoncallback string) revel.Result {
+	jsonp := "%s(%s)"
+	json := `{
+        "result": "OK",
+        "msg": ""
     }`
 	c.Response.ContentType = "application/json;charset=utf-8"
 	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))

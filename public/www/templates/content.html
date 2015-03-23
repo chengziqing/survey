@@ -1,20 +1,23 @@
-<ion-view title="基站1勘察项目">
+<ion-view title="勘察内容">
 <ion-content>
     <div class="list card">
-        <a href="#/tab/checkin" class="item item-icon-left"> <i class="icon ion-ios7-telephone"></i>
+        <a ng-href="#/tab/checkin/{{item.TaskId}}/{{item.SiteId}}" class="item item-icon-left"> <i class="icon ion-location"></i>
             现场签到
+            <span class="item-note">{{item.SignStatus | signstatus}}</span>
         </a>
-        <a href="#/tab/form" class="item item-icon-left">
-            <i class="icon ion-wifi"></i>
+        <a ng-href="#/tab/infotypes/{{item.TaskId}}" class="item item-icon-left">
+            <i class="icon ion-document-text"></i>
             信息采集
+            <span class="item-note">{{item.CollectStatus | collectstatus}}</span>
         </a>
         <a href="#" class="item item-icon-left">
-            <i class="icon ion-card"></i>
+            <i class="icon ion-images"></i>
             图片采集
+            <span class="item-note">已完成{{item.PicDoingNum}}张/总共{{item.PicTotalNum}}张</span>
         </a>
     </div>
         <div class="list card">
-        <a href="#/tab/checkin" class="item item-icon-left"> <i class="icon ion-ios7-telephone"></i>
+        <a href="#/tab/checkin" class="item item-icon-left"> <i class="icon ion-ios-chatboxes"></i>
             信息沟通
         </a>
     </div>

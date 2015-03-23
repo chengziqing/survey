@@ -1,39 +1,11 @@
-<ion-view title="表单">
+<ion-view view-title="{{title}}">
+<ion-nav-buttons side="secondary">
+  <button class="button">确定</button>
+</ion-nav-buttons>
   <ion-content>
-    <label class="item item-input">
-      <span class="input-label">姓名</span>
-      <input type="text"></label>
-    <label class="item item-input">
-      <span class="input-label">家庭住址</span>
-      <input type="text"></label>
-    <div class="item item-divider">网络信息</div>
-    <li class="item item-checkbox">
-      <label class="checkbox">
-        <input type="checkbox"></label>
-      是否漏电
-    </li>
-    <li class="item item-checkbox">
-      <label class="checkbox">
-        <input type="checkbox"></label>
-      是否有网
-    </li>
-    <div class="item item-divider">路由厂家</div>
-    <label class="item item-radio">
-      <input type="radio" name="group">
-      <div class="item-content">Go</div> <i class="radio-icon ion-checkmark"></i>
-    </label>
-    <label class="item item-radio">
-      <input type="radio" name="group">
-      <div class="item-content">Go</div> <i class="radio-icon ion-checkmark"></i>
-    </label>
-    <ion-toggle ng-model="airplaneMode" toggle-class="toggle-calm">Airplane Mode</ion-toggle>
-    <label class="item item-input item-select">
-      <div class="input-label">Lightsaber</div>
-      <select>
-        <option>Blue</option>
-        <option selected>Green</option>
-        <option>Red</option>
-      </select>
-    </label>
+    <div ng-if="item.ShowType=='0'">
+      <label class="item item-input">
+        <input type="text" id="{{item.PropertyID}}"></label>
+    </div>
   </ion-content>
 </ion-view>

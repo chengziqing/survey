@@ -8,6 +8,18 @@ GET     /                                       App.Index
 GET     /GetUserInfo                            App.GetUserInfo
 GET     /GetItemList                            App.GetItemList
 GET     /GetItemSiteList                        App.GetItemSiteList
+GET     /GetSiteAllStatus                       App.GetSiteAllStatus
+GET     /GetSiteSign                            App.GetSiteSign
+GET     /GetTaskInfoTypes                       App.GetTaskInfoTypes
+GET     /GetTaskPropertys                       App.GetTaskPropertys
+GET     /GetTaskPropertyControl                 App.GetTaskPropertyControl
+GET     /GetHistoryTask                         App.GetHistoryTask
+GET     /GetHistoryPropertyValue                App.GetHistoryPropertyValue
+GET     /getTaskMemberList                      App.GetTaskMemberList
+GET     /getSiteDirectory                       App.GetSiteDirectory
+GET     /getSitePicName                         App.GetSitePicName
+GET     /TaskFormDataUpload                     App.TaskFormDataUpload
+
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
