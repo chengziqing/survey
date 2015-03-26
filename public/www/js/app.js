@@ -1,3 +1,5 @@
+var HTTP_HOST="http://192.168.1.32:8082/ReaisService.asmx";
+var USER_ID="1F231B12-BB73-441E-8220-0AA1542767A1";
 angular.module('ionicApp', ['ionic'])
 .config(function($stateProvider, $urlRouterProvider,$ionicConfigProvider) {
   $ionicConfigProvider.platform.android.tabs.position("bottom");
@@ -40,7 +42,7 @@ angular.module('ionicApp', ['ionic'])
       }
     })
     .state('tabs.station', {
-      url: "/station",
+      url: "/station/:TaskId",
       views: {
         'working-tab': {
           templateUrl: "templates/station.html",
@@ -49,7 +51,7 @@ angular.module('ionicApp', ['ionic'])
       }
     })
     .state('tabs.content', {
-      url: "/content",
+      url: "/content/:TaskId/:SiteId",
       views: {
         'working-tab': {
           templateUrl: "templates/content.html",
@@ -67,7 +69,7 @@ angular.module('ionicApp', ['ionic'])
       }
     })
     .state('tabs.infotypes', {
-      url: "/infotypes/:TaskId",
+      url: "/infotypes/:TaskId/:SiteId",
       views: {
         'working-tab': {
           templateUrl: "templates/infotypes.html",
@@ -76,7 +78,7 @@ angular.module('ionicApp', ['ionic'])
       }
     })
     .state('tabs.form', {
-      url: "/form",
+      url: "/form/:TaskId/:SiteId/:TypeID",
       views: {
         'working-tab': {
           templateUrl: "templates/form.html",
@@ -85,7 +87,7 @@ angular.module('ionicApp', ['ionic'])
       }
     })
     .state('tabs.baseform', {
-      url: "/baseform",
+      url: "/baseform/:TaskId/:SiteId/:TypeID/:PropertyID/:IsPropertyGroup",
       views: {
         'working-tab': {
           templateUrl: "templates/baseform.html",
@@ -129,10 +131,10 @@ angular.module('ionicApp', ['ionic'])
 })
 .filter('collectstatus', function() {
   return function(status) {
-    if (status == "0") {
+    if (status == "0" || status=="False") {
       return "未提交";
     }
-    if (status == "1") {
+    if (status == "1" || status=="True"){
       return "已提交";
     }
   };
@@ -142,7 +144,7 @@ angular.module('ionicApp', ['ionic'])
 })
 .controller('WorkingTabCtrl',function($scope,$http,$timeout){
   console.log('WorkingTabCtrl');
-  $http.jsonp("/GetItemList?jsoncallback=JSON_CALLBACK").
+  $http.jsonp(HTTP_HOST+"/GetItemList?page=1&rolekind=7&currentstatus=0&userid="+USER_ID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
@@ -162,9 +164,10 @@ angular.module('ionicApp', ['ionic'])
 .controller('AlreadyTabCtrl', function($scope, $timeout) {
   console.log('AlreadyTabCtrl');
 })
-.controller('StationTabCtrl',function($scope,$timeout,$http){
+.controller('StationTabCtrl',function($scope,$http,$stateParams){
   console.log('StationTabCtrl');
-  $http.jsonp("/GetItemSiteList?jsoncallback=JSON_CALLBACK").
+  $scope.TaskId=$stateParams.TaskId
+  $http.jsonp(HTTP_HOST+"/GetItemSiteList?page=1&itemid="+$scope.TaskId+"&userid="+USER_ID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
@@ -172,9 +175,11 @@ angular.module('ionicApp', ['ionic'])
       console.log("error");
   });
 })
-.controller('ContentTabCtrl',function($scope,$http){
+.controller('ContentTabCtrl',function($scope,$http,$stateParams){
   console.log('ContentTabCtrl');
-  $http.jsonp("/GetSiteAllStatus?jsoncallback=JSON_CALLBACK").
+  $scope.TaskId=$stateParams.TaskId;
+  $scope.SiteId=$stateParams.SiteId;
+  $http.jsonp(HTTP_HOST+"/GetSiteAllStatus?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.item=data.root[0];
     }).
@@ -231,9 +236,11 @@ angular.module('ionicApp', ['ionic'])
   map.addOverlay(marker1);
 
 })
-.controller('InfotypesTabCtrl',function($scope,$http){
+.controller('InfotypesTabCtrl',function($scope,$http,$stateParams){
   console.log('InfotypesTabCtrl');
-  $http.jsonp("/GetTaskInfoTypes?jsoncallback=JSON_CALLBACK").
+  $scope.TaskId=$stateParams.TaskId;
+  $scope.SiteId=$stateParams.SiteId;
+  $http.jsonp(HTTP_HOST+"/GetTaskInfoTypes?TaskId="+$scope.TaskId+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
@@ -242,9 +249,12 @@ angular.module('ionicApp', ['ionic'])
   });
 
 })
-.controller('FormTabCtrl',function($scope,$http){
+.controller('FormTabCtrl',function($scope,$http,$stateParams){
   console.log('FormTabCtrl');
-  $http.jsonp("/GetTaskPropertys?jsoncallback=JSON_CALLBACK").
+  $scope.TaskId=$stateParams.TaskId;
+  $scope.SiteId=$stateParams.SiteId;
+  $scope.TypeID=$stateParams.TypeID;
+  $http.jsonp(HTTP_HOST+"/GetTaskPropertys?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&TypeID="+$scope.TypeID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
@@ -260,12 +270,39 @@ angular.module('ionicApp', ['ionic'])
     $ionicHistory.goBack();
   };
 })
-.controller('BaseFormTabCtrl',function($scope,$http){
+.controller('BaseFormTabCtrl',function($scope,$http,$stateParams){
   console.log('BaseFormTabCtrl');
-  $scope.title="核讹咯";
-  $http.jsonp("/GetTaskPropertyControl?jsoncallback=JSON_CALLBACK").
+  $scope.title="表单信息";
+
+  $scope.TaskId=$stateParams.TaskId;
+  $scope.SiteId=$stateParams.SiteId;
+  $scope.TypeID=$stateParams.TypeID;
+  $scope.PropertyID=$stateParams.PropertyID;
+  $scope.IsPropertyGroup=$stateParams.IsPropertyGroup;
+
+  $scope.confirm=function(e){
+    console.log($scope.data.clientSide);
+
+  };
+
+  $http.jsonp(HTTP_HOST+"/GetTaskPropertyControl?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&TypeID="+$scope.TypeID+"&PropertyID="+$scope.PropertyID+"&IsPropertyGroup="+$scope.IsPropertyGroup+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.item=data.root[0];
+      $scope.data={clientSide:$scope.item.Defaults};
+      //处理下拉框,单选框,多选框的样式
+      if ($scope.item.ShowType == "3" || $scope.item.ShowType == "4" || $scope.item.ShowType == "5") {
+        var radios = new Array();
+        var optional = $scope.item.PropertyValue.split(",");
+        //var defaults = $scope.item.Defaults.split(",");
+        for (var i = 0; i < optional.length; i++) {
+          var radio = {
+            text: optional[i],
+            value:optional[i]
+          };
+          radios.push(radio);
+        }
+        $scope.radios = radios;
+      }
     }).
     error(function(data, status) {
       console.log("error");

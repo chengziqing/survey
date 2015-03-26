@@ -5,7 +5,7 @@
             现场签到
             <span class="item-note">{{item.SignStatus | signstatus}}</span>
         </a>
-        <a ng-href="#/tab/infotypes/{{item.TaskId}}" class="item item-icon-left">
+        <a ng-href="#/tab/infotypes/{{item.TaskId}}/{{item.SiteId}}" class="item item-icon-left">
             <i class="icon ion-document-text"></i>
             信息采集
             <span class="item-note">{{item.CollectStatus | collectstatus}}</span>

@@ -1,11 +1,51 @@
 <ion-view view-title="{{title}}">
 <ion-nav-buttons side="secondary">
-  <button class="button">确定</button>
+  <button class="button"  ng-click="confirm()">确定</button>
 </ion-nav-buttons>
   <ion-content>
     <div ng-if="item.ShowType=='0'">
-      <label class="item item-input">
-        <input type="text" id="{{item.PropertyID}}"></label>
+      <label class="item item-input padding">
+        <input type="text" style="border:solid 1px #999;"></label>
     </div>
+    <div ng-if="item.ShowType=='1'">
+    	<label class="item item-input">
+        <input type="month" style="border:solid 1px #999;"></label>
+    </div>
+    <div ng-if="item.ShowType=='2'" class="padding">
+    	<textarea rows="5" style="width:100%;border:solid 1px #999;"></textarea>
+    </div>
+    <div ng-if="item.ShowType=='3'">
+    	<div class="list">
+            <div class="item item-divider"> 
+              {{item.PropertylName}} {{data.clientSide}}
+            </div>
+            <ion-radio ng-repeat="oitem in radios"
+                       ng-value="oitem.value"
+                       ng-model="data.clientSide">
+              {{ oitem.text }}
+            </ion-radio>
+    	</div>
+    </div>
+    <div ng-if="item.ShowType=='4'">
+    	<div class="list">
+            <div class="item item-divider"> 
+              {{item.PropertylName}} {{data.clientSide}}
+            </div>
+            <ion-radio ng-repeat="oitem in radios"
+                       ng-value="oitem.value"
+                       ng-model="data.clientSide">
+              {{ oitem.text }}
+            </ion-radio>
+    	</div>
+    </div>
+    <div ng-if="item.ShowType=='5'">
+    	<ul class="list">
+    		<li class="item item-checkbox" ng-repeat="oitem in radios">
+    			<label class="checkbox">
+    				<input type="checkbox" ng-checked="oitem.checked"></label>
+    			{{oitem.value}}
+    		</li>	
+    	</ul>
+    </div>    
   </ion-content>
 </ion-view>

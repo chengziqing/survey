@@ -1,7 +1,7 @@
 <ion-view title="基站列表" class="padding">
 <ion-content>
    <div class="list">
-   	<a class="item" ng-repeat="item in items" ng-href="#/tab/content?TaskId={{item.TaskId}}&ObjectId={{item.ObjectId}}">
+   	<a class="item" ng-repeat="item in items" ng-href="#/tab/content/{{item.TaskId}}/{{item.ObjectId}}">
    		{{item.ObjectName}}
    		<span class="item-note">{{item.Status | sitestatus}}</span>
    	</a>

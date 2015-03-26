@@ -12,7 +12,7 @@ GET     /GetSiteAllStatus                       App.GetSiteAllStatus
 GET     /GetSiteSign                            App.GetSiteSign
 GET     /GetTaskInfoTypes                       App.GetTaskInfoTypes
 GET     /GetTaskPropertys                       App.GetTaskPropertys
-GET     /GetTaskPropertyControl                 App.GetTaskPropertyControl
+GET     /GetTaskPropertyControl/:showType       App.GetTaskPropertyControl
 GET     /GetHistoryTask                         App.GetHistoryTask
 GET     /GetHistoryPropertyValue                App.GetHistoryPropertyValue
 GET     /getTaskMemberList                      App.GetTaskMemberList

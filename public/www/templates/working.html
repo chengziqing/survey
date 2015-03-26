@@ -2,7 +2,7 @@
 <ion-content>
  <ion-refresher on-refresh="doRefresh()"></ion-refresher>
  <div class="list">
-   <a class="item" ng-repeat="item in items" ng-href="#/tab/station?TaskId={{item.TaskId}}">
+   <a class="item" ng-repeat="item in items" ng-href="#/tab/station/{{item.TaskId}}">
      {{item.TaskName}}
      <span class="badge badge-assertive">{{item.Num}}</span>
    </a>

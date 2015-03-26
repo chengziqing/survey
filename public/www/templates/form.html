@@ -1,11 +1,11 @@
 <ion-view title="信息内容">
 	<ion-content>
 	<div ng-repeat="item in items">
-		<a class="item item-input item-icon-right" ng-if="item.IsPropertyGroup=='0'" href="#/tab/baseform">
+		<a class="item item-input item-icon-right" ng-if="item.IsPropertyGroup=='0'" ng-href="#/tab/baseform/{{item.TaskId}}/{{SiteId}}/{{item.TypeID}}/{{item.PropertyID}}/{{item.IsPropertyGroup}}">
 			<span class="input-label">{{item.PropertylName}}</span> 
-			<input type="text" id="{{item.IsPropertyGroup}}" readonly="readonly" style="background-color:#ffffff;cursor:default" value="合肥大蜀山基站"> 
+			<input type="text" id="{{item.IsPropertyGroup}}" readonly="readonly" style="background-color:#ffffff;cursor:default" value="{{item.Defaults}}"> 
 		</a>
-		<a class="item item-input item-icon-right" ng-if="item.IsPropertyGroup=='1'" href="#/tab/baseform">
+		<a class="item item-input item-icon-right" ng-if="item.IsPropertyGroup=='1'" ng-href="#/tab/groupform/{{item.TaskId}}">
 			<span class="input-label">{{item.PropertylName}}</span> 
 			<i class="icon ion-arrow-right-c"></i>
 		</a>

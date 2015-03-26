@@ -149,12 +149,16 @@ func (c App) GetTaskInfoTypes(jsoncallback string) revel.Result {
 	json := `{
         "root": [{
             "TaskId": "1",
-            "TypeID": "3",
-            TypeName: "基本信息"
-        }, {
-            "TaskId": "2",
-            "TypeID": "4",
-            TypeName: "网络信息"
+            "TypeID": "0",
+            "TypeName": "基本信息"
+        },{
+            "TaskId": "1",
+            "TypeID": "1",
+            "TypeName": "安全设置"
+        },{
+            "TaskId": "1",
+            "TypeID": "2",
+            "TypeName": "权限设置"
         }]
     }`
 	c.Response.ContentType = "application/json;charset=utf-8"
@@ -166,16 +170,46 @@ func (c App) GetTaskPropertys(jsoncallback string) revel.Result {
 	jsonp := "%s(%s)"
 	json := `{
         "root": [{
-            "TaskId": "2",
-            "TypeID": "3",
+            "TaskId": "1",
+            "TypeID": "0",
             "PropertyID": "1",
-            PropertylName: "基站名称",
+            "PropertylName": "单行文本框",
             "IsPropertyGroup": "0"
         }, {
-            "TaskId": "2",
-            "TypeID": "3",
+            "TaskId": "1",
+            "TypeID": "1",
             "PropertyID": "2",
-            PropertylName: "楼层情况",
+            "PropertylName": "日期框",
+            "IsPropertyGroup": "0"
+        }, {
+            "TaskId": "1",
+            "TypeID": "2",
+            "PropertyID": "3",
+            "PropertylName": "多行文本框",
+            "IsPropertyGroup": "0"
+        }, {
+            "TaskId": "1",
+            "TypeID": "3",
+            "PropertyID": "4",
+            "PropertylName": "下拉框",
+            "IsPropertyGroup": "0"
+        }, {
+            "TaskId": "1",
+            "TypeID": "4",
+            "PropertyID": "5",
+            "PropertylName": "单选框",
+            "IsPropertyGroup": "0"
+        }, {
+            "TaskId": "1",
+            "TypeID": "5",
+            "PropertyID": "6",
+            "PropertylName": "多选框",
+            "IsPropertyGroup": "0"
+        }, {
+            "TaskId": "1",
+            "TypeID": "6",
+            "PropertyID": "7",
+            "PropertylName": "组类型",
             "IsPropertyGroup": "1"
         }]
     }`
@@ -184,9 +218,9 @@ func (c App) GetTaskPropertys(jsoncallback string) revel.Result {
 }
 
 //7 任务/业务类别下信息属性样式获取
-func (c App) GetTaskPropertyControl(jsoncallback string) revel.Result {
+func (c App) GetTaskPropertyControl(jsoncallback string, showType string) revel.Result {
 	jsonp := "%s(%s)"
-	json := `{
+	json0 := `{
         "root": [{
             "TaskId": "1",
             "TypeID": "",
@@ -198,10 +232,94 @@ func (c App) GetTaskPropertyControl(jsoncallback string) revel.Result {
             "Defaults": "",
             "Validator": "",
             "MaxLength": ""
-
+        }]
+    }`
+	json1 := `{
+        "root": [{
+            "TaskId": "1",
+            "TypeID": "",
+            "PropertyID": "1",
+            "PropertylName": "基站名称",
+            "ShowType": "1",
+            "ShowStyle": "0",
+            "PropertyValue": "",
+            "Defaults": "",
+            "Validator": "",
+            "MaxLength": ""
+        }]
+    }`
+	json2 := `{
+        "root": [{
+            "TaskId": "1",
+            "TypeID": "",
+            "PropertyID": "1",
+            "PropertylName": "基站名称",
+            "ShowType": "2",
+            "ShowStyle": "0",
+            "PropertyValue": "",
+            "Defaults": "",
+            "Validator": "",
+            "MaxLength": ""
+        }]
+    }`
+	json3 := `{
+        "root": [{
+            "TaskId": "1",
+            "TypeID": "",
+            "PropertyID": "1",
+            "PropertylName": "基站名称",
+            "ShowType": "3",
+            "ShowStyle": "0",
+            "PropertyValue": "",
+            "Defaults": "",
+            "Validator": "",
+            "MaxLength": ""
+        }]
+    }`
+	json4 := `{
+        "root": [{
+            "TaskId": "1",
+            "TypeID": "",
+            "PropertyID": "1",
+            "PropertylName": "基站名称",
+            "ShowType": "4",
+            "ShowStyle": "0",
+            "PropertyValue": "",
+            "Defaults": "",
+            "Validator": "",
+            "MaxLength": ""
+        }]
+    }`
+	json5 := `{
+        "root": [{
+            "TaskId": "1",
+            "TypeID": "",
+            "PropertyID": "1",
+            "PropertylName": "基站名称",
+            "ShowType": "5",
+            "ShowStyle": "0",
+            "PropertyValue": "",
+            "Defaults": "",
+            "Validator": "",
+            "MaxLength": ""
         }]
     }`
 	c.Response.ContentType = "application/json;charset=utf-8"
+	json := json0
+	switch showType {
+	case "0":
+		json = json0
+	case "1":
+		json = json1
+	case "2":
+		json = json2
+	case "3":
+		json = json3
+	case "4":
+		json = json4
+	case "5":
+		json = json5
+	}
 	return c.RenderText(fmt.Sprintf(jsonp, jsoncallback, json))
 }
 
