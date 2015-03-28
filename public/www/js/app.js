@@ -13,7 +13,7 @@ angular.module('ionicApp', ['ionic'])
   $ionicConfigProvider.platform.android.tabs.position("bottom");
   $ionicConfigProvider.tabs.style('standard');
   $ionicConfigProvider.backButton.text('返回').icon('ion-ios7-arrow-thin-left');
-  $ionicConfigProvider.backButton.previousTitleText(true);
+  $ionicConfigProvider.backButton.previousTitleText(false);
   $ionicConfigProvider.navBar.alignTitle('center');
 
   $stateProvider
