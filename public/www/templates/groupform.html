@@ -1,0 +1,10 @@
+<ion-view title="组数据">
+	<ion-content>
+	<div ng-repeat="item in items">
+		<a class="item item-input item-icon-right" ng-href="#/tab/baseform/{{item.TaskId}}/{{item.SiteId}}/{{item.TypeID}}/{{item.PropertyID}}/0/{{item.PropertylName}}">
+			<span class="input-label">{{item.PropertylName}}</span> 
+			<input type="text" id="{{item.IsPropertyGroup}}" readonly="readonly" style="background-color:#ffffff;cursor:default" value="{{item.Defaults}}"> 
+		</a>
+	</div>
+	</ion-content>
+</ion-view>

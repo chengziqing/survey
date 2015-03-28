@@ -1,0 +1,11 @@
+<ion-view title="往期数据">
+	<ion-content>
+		<div class="list">
+			<a class="item item-avatar item-button-right" ng-repeat="item in items" ng-click="pushData(item)">
+				<img src="img/task.png">
+				<h2>{{item.TaskName}}</h2>
+				<p>分配人：{{item.CreateUserName}} 分配日期：{{item.CreateDate | strtodate | date:'yyyy年MM月dd日'}}</p>
+			</a>
+		</div>
+	</ion-content>
+</ion-view>

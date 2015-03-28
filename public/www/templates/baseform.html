@@ -5,20 +5,17 @@
   <ion-content>
     <div ng-if="item.ShowType=='0'">
       <label class="item item-input padding">
-        <input type="text" style="border:solid 1px #999;"></label>
+        <input type="text" ng-model="item.Defaults"></label>
     </div>
     <div ng-if="item.ShowType=='1'">
     	<label class="item item-input">
-        <input type="month" style="border:solid 1px #999;"></label>
+        <input type="text" ng-model="item.Defaults"></label>
     </div>
     <div ng-if="item.ShowType=='2'" class="padding">
-    	<textarea rows="5" style="width:100%;border:solid 1px #999;"></textarea>
+    	<textarea rows="5" style="width:100%;" ng-model="item.Defaults"></textarea>
     </div>
     <div ng-if="item.ShowType=='3'">
     	<div class="list">
-            <div class="item item-divider"> 
-              {{item.PropertylName}} {{data.clientSide}}
-            </div>
             <ion-radio ng-repeat="oitem in radios"
                        ng-value="oitem.value"
                        ng-model="data.clientSide">
@@ -28,9 +25,6 @@
     </div>
     <div ng-if="item.ShowType=='4'">
     	<div class="list">
-            <div class="item item-divider"> 
-              {{item.PropertylName}} {{data.clientSide}}
-            </div>
             <ion-radio ng-repeat="oitem in radios"
                        ng-value="oitem.value"
                        ng-model="data.clientSide">
@@ -40,11 +34,11 @@
     </div>
     <div ng-if="item.ShowType=='5'">
     	<ul class="list">
-    		<li class="item item-checkbox" ng-repeat="oitem in radios">
-    			<label class="checkbox">
-    				<input type="checkbox" ng-checked="oitem.checked"></label>
-    			{{oitem.value}}
-    		</li>	
+        <ion-checkbox ng-repeat="oitem in checkboxs"
+              ng-model="oitem.checked" 
+              ng-checked="oitem.checked">
+      {{ oitem.text }}
+        </ion-checkbox>
     	</ul>
     </div>    
   </ion-content>

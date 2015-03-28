@@ -1,0 +1,20 @@
+<ion-view title="图片列表">
+<ion-nav-buttons side="secondary">
+	<button class="button">新增图片</button>
+</ion-nav-buttons>
+<ion-content>
+
+    <ion-list>
+    	<ion-item ng-repeat="item in items"
+            class="item-thumbnail-left">
+    		<img src="img/blue-album.jpg">    
+    		<h2>{{item.PicName}}</h2>
+    		<p>{{item.PicStatus}}</p>
+    		<ion-option-button class="button-balanced"
+                       ng-click="share(item)">上传</ion-option-button>
+    		<ion-option-button class="button-assertive"
+                       ng-click="edit(item)">删除</ion-option-button>
+    	</ion-item>
+    </ion-list>
+</ion-content>
+</ion-view>

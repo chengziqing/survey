@@ -1,5 +1,10 @@
-<ion-view title="待勘察">
-	<ion-content class="padding">
-		<p>待勘察</p>
+<ion-view title="待勘察任务">
+	<ion-content>
+		<div class="list">
+			<a class="item" ng-repeat="item in items" ng-href="#/tab/station/{{item.ProjectId}}/{{item.TaskId}}">
+				{{item.TaskName}}
+				<span class="badge badge-assertive">{{item.Num}}</span>
+			</a>
+		</div>
 	</ion-content>
 </ion-view>

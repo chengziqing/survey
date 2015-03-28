@@ -1,0 +1,14 @@
+<ion-view title="图片列表">
+<ion-content>
+    <ion-list>
+    	<ion-item ng-repeat="item in items"
+            class="item-thumbnail-left">
+    		<img ng-src="{{web_host}}{{item.SmallPicPath}}">    
+    		<h2>{{item.PicName}}</h2>
+    		<p>{{item.PicStatus}}</p>
+    		<ion-option-button class="button-positive"
+                       ng-click="upImage(item)">上传</ion-option-button>
+    	</ion-item>
+    </ion-list>
+</ion-content>
+</ion-view>

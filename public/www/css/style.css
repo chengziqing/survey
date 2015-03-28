@@ -7,3 +7,6 @@
 .anchorBL{
 	display:none;
 }
+.popup-body{
+	overflow:auto;
+}

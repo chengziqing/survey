@@ -6,10 +6,84 @@
     <title></title>
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <!--<script src="cordova.js"></script>-->
+    <script src="GetMMUI.js"></script>
+    <script src="BaiduLoc.js"></script>
+    <script src="phonegap-toast.js"></script>
+
     <script src="lib/ionic/js/ionic.bundle.min.js"></script>
     <script src="lib/ionic/js/angular-ui/angular-ui-router.min.js"></script>
+    <script src="js/tools.js"></script>
     <script src="js/app.js"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=QUPz8vKFmA2XY75r6aSa62jn&v=1.0"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?ak=QUPz8vKFmA2XY75r6aSa62jn&v=1.5"></script>
+
+    <script type="text/javascript">
+     document.addEventListener("deviceready", onDeviceReady, false); 
+       // PhoneGap加载完毕
+     function onDeviceReady() {
+         document.addEventListener("backbutton", eventBackButton, false); //返回键
+         startLocaltion();
+     }
+
+         //返回键事件
+    function eventBackButton(){
+        //    if($.mobile.activePage.is('#loginpage')){//只有在登录页面才可以进行返回键操作。
+        //         if(num==0){
+        //          window.plugins.ToastPlugin.ShowToast('再点击一次退出!',3000);
+        //          num++;
+        //      }
+        //      else{//在3秒内再次按返回键即可退出系统
+        //          document.removeEventListener("backbutton", eventBackButton, false); //注销返回键
+        //          window.clearInterval(intervalID);
+        //          navigator.app.exitApp();
+        //        }
+        //      //3秒后重新进行退出确认
+        //      var intervalID = window.setInterval(function(){num = 0;},3000); 
+        //  }
+        //  else if($.mobile.activePage.is('#sitepiclistpage') || $.mobile.activePage.is('#siteprojectpicpage')) {
+        //     if($(".ps-toolbar-close").length>0){
+        //         $(".ps-toolbar-close").click();
+        //     }
+        //     //navigator.app.backHistory();
+          
+        // }
+    }  
+    function startLocaltion()
+    {
+        window.Location(onLocSuccess, onLocError, 'get', 10000);  //利用百度定位SDK时启用
+    }
+    function stopLocaltion()
+    {
+        window.Location(null, null, 'stop'); //利用百度定位SDK时启用
+
+    }
+    //获取位置信息成功时调用的回调函数
+    function onLocSuccess(p) {
+      if(p!=null){
+          var lat = p.Latitude;  // 纬度    coords.latitude   IOS版本启用
+          var lng = p.Longitude; // 经度   coords.longitude   IOS版本启用
+          var altitude =p.Altitude;
+          var loctype = p.LocType; // 定位类型 161 为网络定位  61 为GPS定位 IOS版本启用
+          NowLocation.SignLng=lng;
+          NowLocation.SignLat=lat;
+          NowLocation.Altitude=altitude;
+        }
+
+    }
+    //获取位置信息失败功时调用的回调函数
+    function onLocError(error) {
+      if(error)
+      {
+         stopLocaltion(); //停止监听
+      }
+    }
+      //显示上传进度
+  function showUploadingProgress( progressEvt ){
+    if( progressEvt.lengthComputable ){
+      navigator.notification.progressValue( Math.round( ( progressEvt.loaded / progressEvt.total ) * 100) );
+    }
+  }
+    </script>
   </head>
   <body>
     <ion-nav-bar class="nav-title-slide-ios7 bar-positive" ng-controller="NavBarCtrl">

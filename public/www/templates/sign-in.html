@@ -1,0 +1,29 @@
+<ion-view view-title="用户登录" hide-nav-bar="true">
+  <ion-content scroll="false" style="min-height:319px;background:url(img/login_pda.png) 50% 0% / 100% 100% no-repeat;">
+<div style="height:148px;position:absolute;top:70px;left:50px;right:50px;text-align:center;">
+  <img src="img/logo_pda.png" style="height:148px;">
+</div>
+  <div style="height:250px;position:absolute;bottom:20px;left:50px;right:50px;">
+    <div class="list">
+      <label class="item item-input">
+        <span class="input-label">用户名</span>
+        <input type="text" ng-model="user.username"></label>
+      <label class="item item-input">
+        <span class="input-label">密&nbsp;&nbsp;&nbsp;&nbsp;码</span>
+        <input type="password" ng-model="user.password"></label>
+
+        <label class="item item-checkbox ng-valid">
+          <div class="checkbox checkbox-input-hidden disable-pointer-events checkbox-square">
+            <input type="checkbox" class="ng-untouched ng-valid ng-dirty ng-valid-parse" ng-model="user.isSave"> <i class="checkbox-icon"></i>
+          </div>
+          <div class="item-content disable-pointer-events">
+            <span class="ng-binding">记住密码</span>
+          </div>
+        </label>
+    </div>
+    <div>
+      <button class="button button-block button-positive" ng-click="signIn(user)">登录</button>
+    </div>
+  </div>
+  </ion-content>
+</ion-view>
