@@ -249,6 +249,16 @@ angular.module('ionicApp', ['ionic'])
     }
   };
 })
+.filter('imagetypestatus', function() {
+  return function(status) {
+    if (status == "0" || status=="False" || status=="") {
+      return "已指定图片";
+    }
+    if (status == "1" || status=="True"){
+      return "自定义图片";
+    }
+  };
+})
 .filter('strtodate', function() {
   return function(str) {
     return new Date(Date.parse(str.replace(/-/g, "/")));
@@ -261,6 +271,34 @@ angular.module('ionicApp', ['ionic'])
     }else{
       return str;
     }
+  };
+})
+.filter('imagecheckstatus', function() {
+  return function(status) {
+    if (status=="0") {
+      return "待处理";
+    }
+    if (status=="1") {
+      return "不符合";
+    }
+    if (status=="2") {
+      return "符合";
+    }
+    return "未知状态";
+  };
+})
+.filter('imagecheckstatuscolor', function() {
+  return function(status) {
+    if (status=="0") {
+      return {color:''};
+    }
+    if (status=="1") {
+      return {color:'red'};
+    }
+    if (status=="2") {
+      return {color:'green'};
+    }
+    return {color:''};
   };
 })
 .controller('SignInCtrl', function($scope, $state,$ionicPopup,$http) {
@@ -826,11 +864,14 @@ angular.module('ionicApp', ['ionic'])
       console.log("error");
   });
 })
-.controller('ImageupTabCtrl',function($scope,$stateParams,$http){
+.controller('ImageupTabCtrl',function($scope,$stateParams,$http,$ionicModal,$ionicPopup){
   console.log('ImageupTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
   $scope.DirectoryID=$stateParams.DirectoryID;
+  $scope.web_host=WEB_HOST;
+  $scope.PicId="";
+  $scope.PicName="";
 
   $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
@@ -839,19 +880,21 @@ angular.module('ionicApp', ['ionic'])
     error(function(data, status) {
       console.log("error");
   });
-})
-.controller('ImagelistTabCtrl',function($scope,$stateParams,$http,$ionicModal){
-  console.log('ImagelistTabCtrl');
-  $scope.TaskId=$stateParams.TaskId;
-  $scope.SiteId=$stateParams.SiteId;
-  $scope.DirectoryID=$stateParams.DirectoryID;
-
-  $scope.web_host=WEB_HOST;
-
-  $ionicModal.fromTemplateUrl('templates/imagemodal.html', {scope: $scope}).then(function(modal) {
+  $ionicModal.fromTemplateUrl('templates/imageupmodal.html?9', {scope: $scope}).then(function(modal) {
     $scope.modal = modal;
+    $scope.modal.PicId=$scope.PicId;
+    $scope.modal.PicName=$scope.PicName;
     $scope.cameraEvent=function(e){
       console.log("相机");
+      //判断图片是否填写名称
+      if (modal.PicName=="") {
+          $ionicPopup.alert({
+            title: '错误提示',
+            template: "请填写图片名称!",
+            okText:"确定"
+          });
+          return
+      }
       //相机
       event.preventDefault();
       var destinationType = navigator.camera.DestinationType;
@@ -863,7 +906,7 @@ angular.module('ionicApp', ['ionic'])
       };
       navigator.camera.getPicture(function(data) {
         var imageURI=data;
-        var params = {"UserId": USER_ID,"ProjectId": PROJECT_ID,"TaskId":$scope.TaskId,"SiteId":$scope.SiteId,"PicId":$scope.PicId,"PicName":$scope.PicName,"DirectoryID":$scope.DirectoryID,"DirectoryName":""};
+        var params = {"UserId": USER_ID,"ProjectId": PROJECT_ID,"TaskId":$scope.TaskId,"SiteId":$scope.SiteId,"PicId":modal.PicId,"PicName":modal.PicName,"DirectoryID":$scope.DirectoryID,"DirectoryName":""};
         fuOptions = new FileUploadOptions();
         fuOptions.fileKey = "file";
         fuOptions.fileName = imageURI.substr(imageURI.lastIndexOf('/')+1);
@@ -877,13 +920,242 @@ angular.module('ionicApp', ['ionic'])
           navigator.notification.progressStop();
           var result=JSON.parse(r.response);
           if (result.result.toLowerCase() == "ok") {
-            navigator.notification.alert("图片上传成功", function(){},"操作提示","确定");
+            $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
+              success(function(data, status) {
+                $scope.items=data.root;
+              }).
+              error(function(data, status) {
+                console.log("error");
+            });
+            $ionicPopup.alert({
+              title: '成功提示',
+              template: "图片上传成功!",
+              okText:"确定"
+            }); 
+            modal.PicName="";
           } else {
-            navigator.notification.alert("提交上传失败", function() {
-            }, "错误提示", "确定");
+            $ionicPopup.alert({
+              title: '错误提示',
+              template: result.msg,
+              okText:"确定"
+            });
           }
           //删除上传的图片
           deletePictureFromCache(imageURI);
+        }, null, fuOptions);
+
+      }, function(error) {
+        console.log('Error');
+      }, options);
+
+    };
+    $scope.albumEvent=function(e){
+      console.log("相册");
+      //判断图片是否填写名称
+      if (modal.PicName=="") {
+          $ionicPopup.alert({
+            title: '错误提示',
+            template: "请填写图片名称!",
+            okText:"确定"
+          });
+          return
+      }
+      //相机
+      event.preventDefault();
+      var source = navigator.camera.PictureSourceType.PHOTOLIBRARY; 
+      //描述类型，取文件路径
+      var destinationType = navigator.camera.DestinationType.FILE_URI; 
+      var mediaType = navigator.camera.MediaType.PICTURE; 
+      var options={ destinationType : destinationType,allowEdit:false, sourceType : source,targetWidth: 1280,targetHeight:768, mediaType : mediaType}; 
+      
+      navigator.camera.getPicture(function(data) {
+        var imageURI=data.substring(0,data.lastIndexOf('?'));
+        var params = {"UserId": USER_ID,"ProjectId": PROJECT_ID,"TaskId":$scope.TaskId,"SiteId":$scope.SiteId,"PicId":modal.PicId,"PicName":modal.PicName,"DirectoryID":$scope.DirectoryID,"DirectoryName":""};
+        fuOptions = new FileUploadOptions();
+        fuOptions.fileKey = "file";
+        fuOptions.fileName = imageURI.substr(imageURI.lastIndexOf('/')+1);
+        fuOptions.mimeType = "multipart/form-data";
+        fuOptions.params = params; 
+        var ft = new FileTransfer();
+        ft.onprogress = showUploadingProgress;
+        navigator.notification.progressStart("", "当前上传进度");
+
+        ft.upload(imageURI, encodeURI(WEB_HOST + '/Public/uploadfile.aspx'), function(r) {
+          navigator.notification.progressStop();
+          var result=JSON.parse(r.response);
+          if (result.result.toLowerCase() == "ok") {
+             $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
+              success(function(data, status) {
+                $scope.items=data.root;
+              }).
+              error(function(data, status) {
+                console.log("error");
+            });
+            $ionicPopup.alert({
+              title: '成功提示',
+              template: "图片上传成功!",
+              okText:"确定"
+            }); 
+            modal.PicName="";
+          } else {
+            $ionicPopup.alert({
+              title: '错误提示',
+              template: result.msg,
+              okText:"确定"
+            });
+          }
+        }, null, fuOptions);
+
+      }, function(error) {
+        console.log('Error');
+      }, options);
+    };
+  });
+  $scope.imageUpload=function(){
+    $scope.modal.show();
+  }
+  $scope.upImage=function(e){
+    $scope.modal.PicId=e.PicId;
+    $scope.modal.PicName=e.PicName;
+    $scope.modal.show();
+  }
+  $scope.delImage=function(e){
+
+    var confirmPopup = $ionicPopup.confirm({
+      title: '确认提示',
+      template: '确定删除(' + e.PicName + '),这张图片吗?',
+      cancelText: "取消",
+      okText: "确定"
+    });
+    confirmPopup.then(function(res) {
+      if (res) {
+          $http.jsonp(WEB_HOST+"/Public/DelPicture.aspx?PicId="+e.PicId+"&jsoncallback=JSON_CALLBACK").
+            success(function(data, status) {
+                if (data.result.toLowerCase()=="ok") {
+                  $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
+                    success(function(data, status) {
+                      $scope.items=data.root;
+                    }).
+                    error(function(data, status) {
+                      console.log("error");
+                  });
+                }else{
+                  $ionicPopup.alert({
+                    title: '失败提示',
+                    template: data.msg,
+                    okText:"确定"
+                  });
+                }
+            }).
+            error(function(data, status) {
+              console.log("error");
+          });
+      } else {
+        console.log('You are not sure');
+      }
+    });
+  }
+})
+.controller('ImagelistTabCtrl',function($scope,$stateParams,$http,$ionicModal,$ionicPopup){
+  console.log('ImagelistTabCtrl');
+  $scope.TaskId=$stateParams.TaskId;
+  $scope.SiteId=$stateParams.SiteId;
+  $scope.DirectoryID=$stateParams.DirectoryID;
+  $scope.web_host=WEB_HOST;
+
+  $scope.PicId="";
+  $scope.PicName="";
+
+  $ionicModal.fromTemplateUrl('templates/imagemodal.html?4', {scope: $scope}).then(function(modal) {
+    $scope.modal = modal;
+    $scope.modal.PicId=$scope.PicId;
+    $scope.modal.PicName=$scope.PicName;
+
+    $scope.cameraEvent=function(e){
+      console.log("相机");
+      //相机
+      event.preventDefault();
+      var destinationType = navigator.camera.DestinationType;
+      var options = {
+        //quality: 50,
+        destinationType: destinationType.FILE_URI,
+        targetWidth: 1280,
+        targetHeight: 768
+      };
+      navigator.camera.getPicture(function(data) {
+        var imageURI=data;
+        var params = {"UserId": USER_ID,"ProjectId": PROJECT_ID,"TaskId":$scope.TaskId,"SiteId":$scope.SiteId,"PicId":modal.PicId,"PicName":modal.PicName,"DirectoryID":$scope.DirectoryID,"DirectoryName":""};
+        fuOptions = new FileUploadOptions();
+        fuOptions.fileKey = "file";
+        fuOptions.fileName = imageURI.substr(imageURI.lastIndexOf('/')+1);
+        fuOptions.mimeType = "multipart/form-data";
+        fuOptions.params = params; 
+        var ft = new FileTransfer();
+        ft.onprogress = showUploadingProgress;
+        navigator.notification.progressStart("", "当前上传进度");
+
+        ft.upload(imageURI, encodeURI(WEB_HOST + '/Public/uploadfile.aspx'), function(r) {
+          navigator.notification.progressStop();
+          var result=JSON.parse(r.response);
+          if (result.result.toLowerCase() == "ok") {
+            //deletePictureFromCache(imageURI);
+            console.log(result);
+            $http.jsonp(HTTP_HOST + "/getSitePicName?&page=1&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&DirectoryID=" + $scope.DirectoryID + "&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
+            success(function(data, status) {
+              $scope.items = data.root;
+            }).
+            error(function(data, status) {
+              console.log("error");
+            });
+            console.log("获取成功");
+            //拍照成功,询问是否拍下一张图片
+            console.log(modal.PicId);
+            $http.jsonp(HTTP_HOST + "/getSitePicName?&page=1&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&DirectoryID=" + $scope.DirectoryID + "&PicId=" + modal.PicId + "&IsNextPic=1&jsoncallback=JSON_CALLBACK").
+             success(function(data, status) {
+              console.log(data);
+              if (data.root.length == 0) {
+                modal.hide();
+                return
+              }
+              var nextItem = data.root[0];
+              modal.PicId = nextItem.PicId;
+              modal.PicName = nextItem.PicName;
+              console.log(modal.PicId + "," + modal.PicName);
+              var confirmPopup = $ionicPopup.confirm({
+                title: '提示信息',
+                template: '拍照成功!是否拍下一张图片(' + nextItem.PicName + ')?',
+                cancelText: "取消",
+                okText: "确定"
+              });
+              confirmPopup.then(function(res) {
+                if (res) {
+                  modal.PicName = nextItem.PicId;
+                  modal.PicName = nextItem.PicName;
+                  $scope.cameraEvent();
+                } else {
+                  modal.hide();
+                  deletePictureFromCache(imageURI);
+                  return
+                }
+              });
+            }).
+            error(function(data, status) {
+              $ionicPopup.alert({
+                title: '错误提示',
+                template: '上传图片错误',
+                okText:"确定"
+              });
+              return
+            });
+            console.log("//结束");
+          } else {
+            $ionicPopup.alert({
+              title: '错误提示',
+              template: result.msg,
+              okText:"确定"
+            });
+          }
+          //删除上传的图片
         }, null, fuOptions);
 
       }, function(error) {
@@ -903,7 +1175,7 @@ angular.module('ionicApp', ['ionic'])
       
       navigator.camera.getPicture(function(data) {
         var imageURI=data.substring(0,data.lastIndexOf('?'));
-        var params = {"UserId": USER_ID,"ProjectId": PROJECT_ID,"TaskId":$scope.TaskId,"SiteId":$scope.SiteId,"PicId":$scope.PicId,"PicName":$scope.PicName,"DirectoryID":$scope.DirectoryID,"DirectoryName":""};
+        var params = {"UserId": USER_ID,"ProjectId": PROJECT_ID,"TaskId":$scope.TaskId,"SiteId":$scope.SiteId,"PicId":modal.PicId,"PicName":modal.PicName,"DirectoryID":$scope.DirectoryID,"DirectoryName":""};
         fuOptions = new FileUploadOptions();
         fuOptions.fileKey = "file";
         fuOptions.fileName = imageURI.substr(imageURI.lastIndexOf('/')+1);
@@ -912,16 +1184,67 @@ angular.module('ionicApp', ['ionic'])
         var ft = new FileTransfer();
         ft.onprogress = showUploadingProgress;
         navigator.notification.progressStart("", "当前上传进度");
-
         ft.upload(imageURI, encodeURI(WEB_HOST + '/Public/uploadfile.aspx'), function(r) {
           navigator.notification.progressStop();
-          var result=JSON.parse(r.response);
+          var result = JSON.parse(r.response);
           if (result.result.toLowerCase() == "ok") {
-            navigator.notification.alert("图片上传成功", function(){},"操作提示","确定");
+            console.log(result);
+            $http.jsonp(HTTP_HOST + "/getSitePicName?&page=1&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&DirectoryID=" + $scope.DirectoryID + "&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
+            success(function(data, status) {
+              $scope.items = data.root;
+            }).
+            error(function(data, status) {
+              console.log("error");
+            });
+            console.log("获取成功");
+            //拍照成功,询问是否拍下一张图片
+            console.log(modal.PicId);
+            $http.jsonp(HTTP_HOST + "/getSitePicName?&page=1&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&DirectoryID=" + $scope.DirectoryID + "&PicId=" + modal.PicId + "&IsNextPic=1&jsoncallback=JSON_CALLBACK").
+            success(function(data, status) {
+              console.log(data);
+              if (data.root.length == 0) {
+                modal.hide();
+                return
+              }
+              var nextItem = data.root[0];
+              modal.PicId = nextItem.PicId;
+              modal.PicName = nextItem.PicName;
+              console.log(modal.PicId + "," + modal.PicName);
+              var confirmPopup = $ionicPopup.confirm({
+                title: '提示信息',
+                template: '图片上传成功!是否选择下一张图片(' + nextItem.PicName + ')?',
+                cancelText: "取消",
+                okText: "确定"
+              });
+              confirmPopup.then(function(res) {
+                if (res) {
+                  modal.PicName = nextItem.PicId;
+                  modal.PicName = nextItem.PicName;
+                  $scope.albumEvent();
+                } else {
+                  modal.hide();
+                  return
+                }
+              });
+            }).
+            error(function(data, status) {
+              $ionicPopup.alert({
+                title: '错误提示',
+                template: '上传图片错误',
+                okText: "确定"
+              });
+              return
+            });
+            console.log("//结束");
           } else {
-            navigator.notification.alert("提交上传失败", function() {
-            }, "错误提示", "确定");
+            $ionicPopup.alert({
+              title: '错误提示',
+              template: result.msg,
+              okText: "确定"
+            });
           }
+          //结束
+
         }, null, fuOptions);
 
       }, function(error) {
@@ -937,9 +1260,10 @@ angular.module('ionicApp', ['ionic'])
     error(function(data, status) {
       console.log("error");
   });
+
   $scope.upImage=function(e){
-    $scope.PicId=e.PicId;
-    $scope.PicName=e.PicName;
+    $scope.modal.PicId=e.PicId;
+    $scope.modal.PicName=e.PicName;
     $scope.modal.show();
   }
 })

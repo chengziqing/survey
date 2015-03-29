@@ -1,11 +1,20 @@
 <ion-view title="图片类别">
 <ion-content>
-    <div class="list card">
-        <a class="item item-icon-left item-icon-right" ng-repeat="item in items" ng-href="#/tab/imagelist/{{item.TaskId}}/{{SiteId}}/{{item.DirectoryID}}">
-        <i class="icon ion-ios-folder"></i>
-        {{item.DirectoryName}} 
-         <span class="item-note">{{item.DoneNum}}/{{item.LimitNum}}</span>
+    <div class="list">
+    <div ng-repeat="item in items">
+        <a class="item item-avatar" ng-if="item.PicDefType=='0'" ng-href="#/tab/imagelist/{{item.TaskId}}/{{SiteId}}/{{item.DirectoryID}}">
+      <img src="img/pics.png">
+      <h2>{{item.DirectoryName}} </h2>
+      <p>{{item.PicDefType | imagetypestatus}}<span class="item-note">已传{{item.DoneNum}}张/共{{item.LimitNum}}张 </span></p>
+      
         </a>
+        <a class="item item-avatar" ng-if="item.PicDefType=='1'" ng-href="#/tab/imageup/{{item.TaskId}}/{{SiteId}}/{{item.DirectoryID}}">
+	      <img src="img/pics.png">
+	      <h2>{{item.DirectoryName}} </h2>
+	      <p>{{item.PicDefType | imagetypestatus}}<span class="item-note">已传{{item.DoneNum}}张/共{{item.LimitNum}}张 </span></p>
+        </a>
+    </div>
+
     </div>
 </ion-content>
 </ion-view>

@@ -3,10 +3,12 @@
     <ion-list>
     	<ion-item ng-repeat="item in items"
             class="item-thumbnail-left">
-    		<img ng-src="{{web_host}}{{item.SmallPicPath}}">    
+    		<img src="img/nopic.png" ng-if="item.SmallPicPath==''">
+            <img ng-src="{{web_host}}{{item.SmallPicPath}}" ng-if="item.SmallPicPath!=''"> 
     		<h2>{{item.PicName}}</h2>
-    		<p>{{item.PicStatus}}</p>
-    		<ion-option-button class="button-positive"
+    		<p ng-style="item.PicStatus | imagecheckstatuscolor">{{item.PicStatus | imagecheckstatus}}</p>
+            <p>{{item.UploadDate}}</p>
+    		<ion-option-button class="icon-left ion-plus-circled button-balanced"
                        ng-click="upImage(item)">上传</ion-option-button>
     	</ion-item>
     </ion-list>
