@@ -5,19 +5,33 @@
             现场签到
             <span class="item-note">{{item.SignStatus | signstatus}}</span>
         </a>
-        <a ng-href="#/tab/infotypes/{{item.TaskId}}/{{item.SiteId}}" class="item item-icon-left">
+        <a ng-href="#/tab/infotypes/{{item.TaskId}}/{{item.SiteId}}" class="item item-icon-left" ng-if="item.SignStatus=='1'">
             <i class="icon ion-document-text"></i>
             信息采集
             <span class="item-note">{{item.CollectStatus | collectstatus}}</span>
         </a>
-        <a ng-href="#/tab/imagetypes/{{item.TaskId}}/{{item.SiteId}}" class="item item-icon-left">
+        <a  class="item item-icon-left" ng-if="item.SignStatus=='0'" ng-click="tip()">
+            <i class="icon ion-document-text"></i>
+            信息采集
+            <span class="item-note">{{item.CollectStatus | collectstatus}}</span>
+        </a>
+        <a ng-href="#/tab/imagetypes/{{item.TaskId}}/{{item.SiteId}}" class="item item-icon-left" ng-if="item.SignStatus=='1'">
             <i class="icon ion-images"></i>
             图片采集
             <span class="item-note">已完成{{item.PicDoingNum}}张/总共{{item.PicTotalNum}}张</span>
         </a>
+        <a class="item item-icon-left" ng-if="item.SignStatus=='0'" ng-click="tip()">
+            <i class="icon ion-images"></i>
+            图片采集
+            <span class="item-note">已完成{{item.PicDoingNum}}张/总共{{item.PicTotalNum}}张</span>
+        </a>
+
     </div>
         <div class="list card">
-        <a href="#/tab/period/{{item.TaskId}}/{{item.SiteId}}" class="item item-icon-left"> <i class="icon ion-ios-list"></i>
+        <a href="#/tab/period/{{item.TaskId}}/{{item.SiteId}}" class="item item-icon-left" ng-if="item.SignStatus=='1'"> <i class="icon ion-ios-list"></i>
+            往期数据
+        </a>
+        <a class="item item-icon-left" ng-if="item.SignStatus=='0'" ng-click="tip()"> <i class="icon ion-ios-list"></i>
             往期数据
         </a>
         <a href="#/tab/talk/{{item.TaskId}}" class="item item-icon-left"> <i class="icon ion-ios-chatboxes"></i>

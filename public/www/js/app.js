@@ -1,6 +1,7 @@
 var HTTP_HOST="http://192.168.1.32:8082/ReaisService.asmx";
 var WEB_HOST = "http://192.168.1.32:8081";
 var USER_ID="";
+var SITE_STSTUS="00";
 
 var NowLocation = {
   SignLng: "117.212085",
@@ -434,6 +435,9 @@ angular.module('ionicApp', ['ionic'])
   $scope.TaskId=$stateParams.TaskId;
   $scope.ProjectId=$stateParams.ProjectId;
   PROJECT_ID=$stateParams.ProjectId;
+  $scope.setSiteState = function(e) {
+    SITE_STSTUS = e.Status;
+  }
   $http.jsonp(HTTP_HOST+"/GetItemSiteList?page=1&itemid="+$scope.TaskId+"&userid="+USER_ID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
@@ -442,10 +446,17 @@ angular.module('ionicApp', ['ionic'])
       console.log("error");
   });
 })
-.controller('ContentTabCtrl',function($scope,$http,$stateParams){
+.controller('ContentTabCtrl',function($scope,$http,$stateParams,$ionicPopup){
   console.log('ContentTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
+  $scope.tip = function() {
+      $ionicPopup.alert({
+        title: '提示信息',
+        template: "请先签到!",
+        okText:"确定"
+      });
+  }
   $http.jsonp(HTTP_HOST+"/GetSiteAllStatus?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.item=data.root[0];
@@ -546,6 +557,10 @@ angular.module('ionicApp', ['ionic'])
   console.log('InfotypesTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
+  $scope.displaySubmitBtn=true;
+  if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
+    $scope.displaySubmitBtn = false;
+  }
   $scope.submit=function(e){
     var confirmPopup = $ionicPopup.confirm({
       title: '确认信息',
@@ -591,6 +606,12 @@ angular.module('ionicApp', ['ionic'])
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
   $scope.TypeID=$stateParams.TypeID;
+
+  $scope.displayHref=true;
+  if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
+    $scope.displayHref=false;
+  }
+
   $http.jsonp(HTTP_HOST+"/GetTaskPropertys?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&TypeID="+$scope.TypeID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
@@ -609,6 +630,11 @@ angular.module('ionicApp', ['ionic'])
   $scope.PropertyID=$stateParams.PropertyID;
   $scope.PropertylName=$stateParams.PropertylName;
   $scope.IsPropertyGroup=$stateParams.IsPropertyGroup;
+
+  $scope.displayHref=true;
+  if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
+    $scope.displayHref=false;
+  }
 
   $http.jsonp(HTTP_HOST+"/GetTaskPropertyControl?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&TypeID="+$scope.TypeID+"&PropertyID="+$scope.PropertyID+"&IsPropertyGroup="+$scope.IsPropertyGroup+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
@@ -872,6 +898,12 @@ angular.module('ionicApp', ['ionic'])
   $scope.web_host=WEB_HOST;
   $scope.PicId="";
   $scope.PicName="";
+  
+  $scope.displayHref=true;
+  if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
+    $scope.displayHref=false;
+  }
+
 
   $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
@@ -1055,6 +1087,43 @@ angular.module('ionicApp', ['ionic'])
       }
     });
   }
+  $scope.photoSwipe=function(pic){
+    var pswpElement = document.querySelectorAll('.pswp')[0];
+    // build items array
+    var items = new Array();
+    var showIndex=0;
+    for (var i = 0; i < $scope.items.length; i++) {
+      if ($scope.items[i].PicPath != "") {
+        if (pic.PicId == $scope.items[i].PicId) {
+          showIndex = i;
+        }
+        var image = {
+          src: WEB_HOST + $scope.items[i].PicPath,
+          w: 450,
+          h: 600
+        }
+        imgReady(image.src, function() {
+          image.w = this.width;
+          image.h = this.height;
+        });
+        items.push(image);
+      }
+    }
+
+    // define options (if needed)
+    var options = {
+      // history & focus options are disabled on CodePen        
+      history: false,
+      focus: false,
+      index:showIndex,
+      showAnimationDuration: 0,
+      hideAnimationDuration: 0,
+      shareEl:false,
+      fullscreenEl:false
+    };
+    var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+    gallery.init();
+  }
 })
 .controller('ImagelistTabCtrl',function($scope,$stateParams,$http,$ionicModal,$ionicPopup){
   console.log('ImagelistTabCtrl');
@@ -1065,6 +1134,12 @@ angular.module('ionicApp', ['ionic'])
 
   $scope.PicId="";
   $scope.PicName="";
+
+  $scope.displayHref=true;
+  if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
+    $scope.displayHref=false;
+  }
+
 
   $ionicModal.fromTemplateUrl('templates/imagemodal.html?4', {scope: $scope}).then(function(modal) {
     $scope.modal = modal;
@@ -1266,11 +1341,53 @@ angular.module('ionicApp', ['ionic'])
     $scope.modal.PicName=e.PicName;
     $scope.modal.show();
   }
+  $scope.photoSwipe=function(pic){
+    var pswpElement = document.querySelectorAll('.pswp')[0];
+    // build items array
+    var items = new Array();
+    var showIndex=0;
+    for (var i = 0; i < $scope.items.length; i++) {
+      if ($scope.items[i].PicPath != "") {
+        if (pic.PicId == $scope.items[i].PicId) {
+          showIndex = i;
+        }
+        var image = {
+          src: WEB_HOST + $scope.items[i].PicPath,
+          w: 450,
+          h: 600
+        }
+        imgReady(image.src, function() {
+          image.w = this.width;
+          image.h = this.height;
+        });
+        items.push(image);
+      }
+    }
+
+    // define options (if needed)
+    var options = {
+      // history & focus options are disabled on CodePen        
+      history: false,
+      focus: false,
+      index:showIndex,
+      showAnimationDuration: 0,
+      hideAnimationDuration: 0,
+      shareEl:false,
+      fullscreenEl:false
+    };
+    var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+    gallery.init();
+  }
+
 })
 .controller('PeriodTabCtrl',function($scope,$stateParams,$http,$ionicPopup,$ionicHistory){
   console.log('PeriodTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
+  $scope.displayHref=true;
+  if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
+    $scope.displayHref=false;
+  }
 
   $scope.pushData = function(e) {
 

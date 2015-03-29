@@ -70,10 +70,9 @@
           var lng = p.Longitude; // 经度   coords.longitude   IOS版本启用
           var altitude =p.Altitude;
           var loctype = p.LocType; // 定位类型 161 为网络定位  61 为GPS定位 IOS版本启用
-          console.log(p);
           NowLocation.SignLng=lng;
           NowLocation.SignLat=lat;
-          NowLocation.Altitude="0";
+          NowLocation.Altitude=altitude;
         }
 
     }

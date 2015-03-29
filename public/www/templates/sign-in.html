@@ -1,18 +1,18 @@
 <ion-view view-title="用户登录" hide-nav-bar="true">
-  <ion-content scroll="false" style="min-height:319px;background:url(img/login_pda.png) 50% 0% / 100% 100% no-repeat;">
-<div style="height:148px;position:absolute;top:70px;left:50px;right:50px;text-align:center;">
-  <img src="img/logo_pda.png" style="height:148px;">
+  <ion-content scroll="false" style="background-color:#365392">
+<div style="height:148px;position:absolute;top:70px;left:10px;right:10px;text-align:center;">
+  <img src="img/logo_pda.png" style="width:90%;">
 </div>
   <div style="height:250px;position:absolute;bottom:20px;left:50px;right:50px;">
     <div class="list">
-      <label class="item item-input">
-        <span class="input-label">用户名</span>
+      <label class="item item-input" style="margin-left:0px;margin-right:0px;">
+        <span class="input-label"><strong>用户名</strong></span>
         <input type="text" ng-model="user.username"></label>
-      <label class="item item-input">
-        <span class="input-label">密&nbsp;&nbsp;&nbsp;&nbsp;码</span>
+      <label class="item item-input" style="margin-left:0px;margin-right:0px;">
+        <span class="input-label"><strong>密&nbsp;&nbsp;&nbsp;&nbsp;码</strong></span>
         <input type="password" ng-model="user.password"></label>
 
-        <label class="item item-checkbox ng-valid">
+        <label class="item item-checkbox ng-valid" style="margin-left:0px;margin-right:0px;">
           <div class="checkbox checkbox-input-hidden disable-pointer-events checkbox-square">
             <input type="checkbox" class="ng-untouched ng-valid ng-dirty ng-valid-parse" ng-model="user.isSave"> <i class="checkbox-icon"></i>
           </div>
@@ -20,9 +20,7 @@
             <span class="ng-binding">记住密码</span>
           </div>
         </label>
-    </div>
-    <div>
-      <button class="button button-block button-positive" ng-click="signIn(user)">登录</button>
+        <label><button class="button button-block button-stable" ng-click="signIn(user)"><strong>登&nbsp;&nbsp;&nbsp;&nbsp;录</strong></button></label>
     </div>
   </div>
   </ion-content>
