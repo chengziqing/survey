@@ -1,7 +1,7 @@
 <ion-view title="信息沟通">
 	<ion-content>
-<div class="list card">
-  <div class="item item-avatar" ng-repeat="item in items">
+<div class="list card" ng-repeat="item in items">
+  <div class="item item-avatar">
   	<img src="img/contact.png">  
   	<h2>{{item.RealName}}</h2>
   	<p>{{item.Mobile}}</p>
@@ -13,12 +13,11 @@
   	<a class="tab-item" ng-href="smsto:{{item.Mobile}}"> <i class="icon ion-android-textsms"></i>
   		短信
   	</a>
-  	<a class="tab-item" ng-click="doWeixin()">
+  	<a class="tab-item" ng-click="doWeixin(item)">
   		<i class="icon ion-chatbubble-working"></i>
   		微信
   	</a>
   </div>
-
   </div>
 	</ion-content>
 </ion-view>

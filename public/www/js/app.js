@@ -3,18 +3,21 @@ var WEB_HOST = "http://192.168.1.32:8081";
 var USER_ID="";
 
 var NowLocation = {
-  SignLng: "",
-  SignLat: "",
+  SignLng: "117.212085",
+  SignLat: "31.856291",
   Altitude: "10"
 };
 var PROJECT_ID="";
 angular.module('ionicApp', ['ionic'])
-.config(function($stateProvider, $urlRouterProvider,$ionicConfigProvider) {
+.config(function($stateProvider, $urlRouterProvider,$ionicConfigProvider,$compileProvider) {
   $ionicConfigProvider.platform.android.tabs.position("bottom");
   $ionicConfigProvider.tabs.style('standard');
   $ionicConfigProvider.backButton.text('返回').icon('ion-ios7-arrow-thin-left');
   $ionicConfigProvider.backButton.previousTitleText(false);
   $ionicConfigProvider.navBar.alignTitle('center');
+
+      //增加连接调用白名单
+  $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|smsto|tel):/);
 
   $stateProvider
     .state('signin', {
@@ -173,6 +176,37 @@ angular.module('ionicApp', ['ionic'])
     });
    $urlRouterProvider.otherwise("/sign-in");
 })
+.run(['$ionicPlatform', '$ionicPopup','$rootScope','$location', function ($ionicPlatform, $ionicPopup, $rootScope, $location) {
+          $ionicPlatform.registerBackButtonAction(function (e) {
+            e.preventDefault();
+            function showConfirm() {
+                var confirmPopup = $ionicPopup.confirm({
+                    title: '<strong>退出应用?</strong>',
+                    template: '你确定要退出应用吗?',
+                    okText: '退出',
+                    cancelText: '取消'
+                });
+                confirmPopup.then(function (res) {
+                    if (res) {
+                        ionic.Platform.exitApp();
+                    } else {
+                        // Don't close
+                    }
+                });
+            }
+            // Is there a page to go back to?
+            if ($location.path() == '/sign-in' ) {
+                showConfirm();
+            } else if ($rootScope.$viewHistory.backView) {
+                console.log('currentView:', $rootScope.$viewHistory.currentView);
+                $rootScope.$viewHistory.backView.go();
+            } else {
+                // This is the last page: Show confirmation popup
+                showConfirm();
+            }
+            return false;
+        }, 101);
+}])
 .filter('sitestatus', function() {
   return function(status) {
     if (status == "00") {
@@ -241,14 +275,16 @@ angular.module('ionicApp', ['ionic'])
     if (user.username=="") {
         $ionicPopup.alert({
           title: '错误提示',
-          template: '用户名不能为空!'
+          template: '用户名不能为空!',
+          okText:"确定"
         });
         return
     }
     if (user.password=="") {
         $ionicPopup.alert({
           title: '错误提示',
-          template: '密码不能为空!'
+          template: '密码不能为空!',
+          okText:"确定"
         });
         return
     }
@@ -257,7 +293,8 @@ angular.module('ionicApp', ['ionic'])
         if (data.root.length == 0) {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '用户或密码不正确!'
+            template: '用户或密码不正确!',
+            okText:"确定"
           });
           return
         }
@@ -313,12 +350,46 @@ angular.module('ionicApp', ['ionic'])
       console.log("error");
   });
 })
-.controller('AccountTabCtrl', function($scope, $http,$ionicModal) {
+.controller('AccountTabCtrl', function($scope, $http,$ionicModal,$ionicPopup,$state) {
   console.log('AccountTabCtrl');
   $ionicModal.fromTemplateUrl('templates/password.html', {scope: $scope}).then(function(modal) {
     $scope.modal = modal;
+    $scope.modifyPassword=function(e){
+      if (e.newPsd!=e.newPsdAgain) {
+          $ionicPopup.alert({
+            title: '错误提示',
+            template: "两次密码输入不一样!",
+            okText:"确定"
+          });
+          return
+      }
+      $http.jsonp(HTTP_HOST + "/modifyPassword?&userid="+USER_ID+"&oldpass=" + e.oldPsd + "&newpass=" + e.newPsd +"&jsoncallback=JSON_CALLBACK").
+      success(function(data, status) {
+        if (data.result.toLowerCase()=="ok") {
+          $ionicPopup.alert({
+            title: '成功提示',
+            template: "密码修改成功!",
+            okText:"确定"
+          });
+          modal.hide();
+        }else{
+          $ionicPopup.alert({
+            title: '错误提示',
+            template: "密码修改失败!",
+            okText:"确定"
+          });
+        }
+      }).
+      error(function(data, status) {
+        console.log("error");
+      });
+    }
   });
+  $scope.exit=function(){
+    USER_ID="";
+    $state.go('signin');
 
+  }
 })
 .controller('StationTabCtrl',function($scope,$http,$stateParams){
   console.log('StationTabCtrl');
@@ -395,11 +466,11 @@ angular.module('ionicApp', ['ionic'])
         map.addOverlay(marker);
         map.centerAndZoom(point, 17);
       } else {
-        point = new BMap.Point(parseFloat(NowLocation.SignLng), parseFloat(NowLocation.SignLat));
-        map.clearOverlays();
-        marker = new BMap.Marker(point);
-        map.addOverlay(marker);
-        map.centerAndZoom(point, 17);
+          point = new BMap.Point(parseFloat(NowLocation.SignLng), parseFloat(NowLocation.SignLat));
+          map.clearOverlays();
+          marker = new BMap.Marker(point);
+          map.addOverlay(marker);
+          map.centerAndZoom(point, 17);
       }
     }).
     error(function(data, status) {
@@ -416,13 +487,15 @@ angular.module('ionicApp', ['ionic'])
         if (data.result.toLowerCase()=="ok") {
           $ionicPopup.alert({
             title: '提示信息',
-            template: "签到成功!"
+            template: "签到成功!",
+            okText:"确定"
           });
           $scope.checkintext="重新签到";
         }else{
           $ionicPopup.alert({
             title: '提示信息',
-            template: "签到失败!"
+            template: "签到失败!",
+            okText:"确定"
           });
         }
       }).
@@ -438,7 +511,9 @@ angular.module('ionicApp', ['ionic'])
   $scope.submit=function(e){
     var confirmPopup = $ionicPopup.confirm({
       title: '确认信息',
-      template: '确定提表单信息吗?'
+      template: '确定提表单信息吗?',
+      cancelText:"取消",
+      okText:"确定"
     });
     confirmPopup.then(function(res) {
       if (res) {
@@ -451,7 +526,8 @@ angular.module('ionicApp', ['ionic'])
           }else{
             $ionicPopup.alert({
               title: '错误提示',
-              template: data.msg
+              template: data.msg,
+              okText:"确定"
             });
           }
         }).
@@ -550,7 +626,8 @@ angular.module('ionicApp', ['ionic'])
         if (inputValue == "") {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '请选择或输入内容!'
+            template: '请选择或输入内容!',
+            okText:"确定"
           });
           return;
         }
@@ -560,7 +637,8 @@ angular.module('ionicApp', ['ionic'])
         if (inputValue == "" || !re.test(inputValue)) {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '请填写数字!'
+            template: '请填写数字!',
+            okText:"确定"
           });
           return;
         }
@@ -570,7 +648,8 @@ angular.module('ionicApp', ['ionic'])
         if (inputValue == "" || !re.test(inputValue)) {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '请填写数字或不填!'
+            template: '请填写数字或不填!',
+            okText:"确定"
           });
           return;
         }
@@ -580,7 +659,8 @@ angular.module('ionicApp', ['ionic'])
         if (inputValue == "" || !re.test(inputValue)) {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '请填写正确电话号码!'
+            template: '请填写正确电话号码!',
+            okText:"确定"
           });
           return;
         }
@@ -590,7 +670,8 @@ angular.module('ionicApp', ['ionic'])
         if (inputValue != "" && re.test(inputValue)) {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '请填写正确的电话号码或不填!'
+            template: '请填写正确的电话号码或不填!',
+            okText:"确定"
           });
           return;
         }
@@ -600,7 +681,8 @@ angular.module('ionicApp', ['ionic'])
         if (inputValue == "" || !re.test(inputValue)) {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '请填写正确的手机号码!'
+            template: '请填写正确的手机号码!',
+            okText:"确定"
           });
           return;
         }
@@ -611,7 +693,8 @@ angular.module('ionicApp', ['ionic'])
             if (!re.test(inputValue)) {
               $ionicPopup.alert({
                 title: '错误提示',
-                template: '请填写正确的手机号码或不填!'
+                template: '请填写正确的手机号码或不填!',
+                okText:"确定"
               });
               retrun;
             }
@@ -624,7 +707,8 @@ angular.module('ionicApp', ['ionic'])
           if (!mre.test(inputValue) || !pre.test(inputValue)) {
             $ionicPopup.alert({
               title: '错误提示',
-              template: '请填写正确的手机号码或电话号码或不填!'
+              template: '请填写正确的手机号码或电话号码或不填!',
+              okText:"确定"
             });
             retrun;
           }
@@ -635,7 +719,8 @@ angular.module('ionicApp', ['ionic'])
         if (inputValue == "" || !re.test(inputValue)) {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '请填写正确的邮箱地址!'
+            template: '请填写正确的邮箱地址!',
+            okText:"确定"
           });
           retrun;
         }
@@ -646,7 +731,8 @@ angular.module('ionicApp', ['ionic'])
           if (!re.test(inputValue)) {
             $ionicPopup.alert({
               title: '错误提示',
-              template: '请填写正确的邮箱地址或不填!'
+              template: '请填写正确的邮箱地址或不填!',
+              okText:"确定"
             });
             retrun;
           }
@@ -657,7 +743,8 @@ angular.module('ionicApp', ['ionic'])
         if (!re.test(inputValue)) {
           $ionicPopup.alert({
             title: '错误提示',
-            template: '请填写正确的日期!'
+            template: '请填写正确的日期!',
+            okText:"确定"
           });
           retrun;
         }
@@ -865,7 +952,9 @@ angular.module('ionicApp', ['ionic'])
 
     var confirmPopup = $ionicPopup.confirm({
       title: '确认提示',
-      template: '确定采用('+e.TaskName+')的数据吗?'
+      template: '确定采用('+e.TaskName+')的数据吗?',
+      cancelText:"取消",
+      okText:"确定"
     });
     confirmPopup.then(function(res) {
       if (res) {
@@ -877,7 +966,8 @@ angular.module('ionicApp', ['ionic'])
           }else{
             $ionicPopup.alert({
               title: '错误提示',
-              template: data.msg
+              template: data.msg,
+              okText:"确定"
             });
           }
         }).
@@ -900,7 +990,6 @@ angular.module('ionicApp', ['ionic'])
 .controller('TalkTabCtrl',function($scope,$stateParams,$http){
   console.log('TalkTabCtrl');
   $scope.TaskId = $stateParams.TaskId;
-  }
   $scope.doWeixin=function(e){
     startMMUI();
   }
