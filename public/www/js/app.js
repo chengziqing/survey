@@ -163,7 +163,7 @@ angular.module('ionicApp', ['ionic'])
       }
     })
     .state('tabs.talk', {
-      url: "/talk/:TaskId/:SiteId",
+      url: "/talk/:TaskId",
       views: {
         'working-tab': {
           templateUrl: "templates/talk.html",
@@ -899,4 +899,17 @@ angular.module('ionicApp', ['ionic'])
 })
 .controller('TalkTabCtrl',function($scope,$stateParams,$http){
   console.log('TalkTabCtrl');
+  $scope.TaskId = $stateParams.TaskId;
+  }
+  $scope.doWeixin=function(e){
+    startMMUI();
+  }
+
+  $http.jsonp(HTTP_HOST + "/getTaskMemberList?&TaskId="+$scope.TaskId+"&jsoncallback=JSON_CALLBACK").
+  success(function(data, status) {
+    $scope.items = data.root;
+  }).
+  error(function(data, status) {
+    console.log("error");
+  });
 });

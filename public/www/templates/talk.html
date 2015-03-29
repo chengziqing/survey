@@ -1,21 +1,20 @@
 <ion-view title="信息沟通">
 	<ion-content>
 <div class="list card">
-
-  <div class="item item-avatar">
+  <div class="item item-avatar" ng-repeat="item in items">
   	<img src="img/contact.png">  
-  	<h2>程子清</h2>
-  	<p>November 05, 1955</p>
+  	<h2>{{item.RealName}}</h2>
+  	<p>{{item.Mobile}}</p>
   </div>
   <div class="item tabs tabs-secondary tabs-icon-left">
-  	<a class="tab-item" href="#"> <i class="icon ion-thumbsup"></i>
+  	<a class="tab-item" ng-href="tel:{{item.Mobile}}"> <i class="icon ion-iphone"></i>
   		手机
   	</a>
-  	<a class="tab-item" href="#"> <i class="icon ion-chatbox"></i>
+  	<a class="tab-item" ng-href="smsto:{{item.Mobile}}"> <i class="icon ion-android-textsms"></i>
   		短信
   	</a>
-  	<a class="tab-item" href="#">
-  		<i class="icon ion-share"></i>
+  	<a class="tab-item" ng-click="doWeixin()">
+  		<i class="icon ion-chatbubble-working"></i>
   		微信
   	</a>
   </div>
