@@ -308,7 +308,7 @@ angular.module('ionicApp', ['ionic'])
     return {color:''};
   };
 })
-.controller('SignInCtrl', function($scope, $state,$ionicPopup,$http) {
+.controller('SignInCtrl', function($scope, $state,$ionicPopup,$http,$ionicHistory) {
   var loginForm = {
     username: window.localStorage.getItem("reais3_username")==null?"":window.localStorage.getItem("reais3_username"),
     password: window.localStorage.getItem("reais3_password")==null?"":window.localStorage.getItem("reais3_password"),
@@ -354,8 +354,7 @@ angular.module('ionicApp', ['ionic'])
           window.localStorage.setItem("reais3_password", "");
           window.localStorage.setItem("reais3_isSave", false);
         }
-
-        //window.plugins.ToastPlugin.ShowToast('欢迎'+accountInfo.UserName+'进入系统!',3000);
+        $ionicHistory.clearHistory();
         $state.go('tabs.wait');
       }).
       error(function(data, status) {
