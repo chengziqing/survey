@@ -308,7 +308,7 @@ angular.module('ionicApp', ['ionic'])
     return {color:''};
   };
 })
-.controller('SignInCtrl', function($scope, $state,$ionicPopup,$http,$ionicHistory) {
+.controller('SignInCtrl', function($scope, $state,$ionicPopup,$http,$ionicHistory,$ionicLoading) {
   var loginForm = {
     username: window.localStorage.getItem("reais3_username")==null?"":window.localStorage.getItem("reais3_username"),
     password: window.localStorage.getItem("reais3_password")==null?"":window.localStorage.getItem("reais3_password"),
@@ -333,6 +333,9 @@ angular.module('ionicApp', ['ionic'])
         });
         return
     }
+    $ionicLoading.show({
+      template: 'Loading...'
+    });
     $http.jsonp(HTTP_HOST + "/GetUserInfo?username="+user.username+"&password="+user.password+"&jsoncallback=JSON_CALLBACK").
       success(function(data, status) {
         if (data.root.length == 0) {
@@ -355,6 +358,7 @@ angular.module('ionicApp', ['ionic'])
           window.localStorage.setItem("reais3_isSave", false);
         }
         $ionicHistory.clearHistory();
+        $ionicLoading.hide();
         $state.go('tabs.wait');
       }).
       error(function(data, status) {
