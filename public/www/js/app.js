@@ -1,5 +1,11 @@
-var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
-var WEB_HOST = "http://www.share-net.cn:8081";
+//外网
+//var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
+//var WEB_HOST = "http://www.share-net.cn:8081";
+
+//内网
+var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
+var WEB_HOST = "http://192.168.1.32:8081";
+
 var USER_ID="";
 var SITE_STSTUS="00";
 
@@ -18,7 +24,7 @@ angular.module('ionicApp', ['ionic'])
   $ionicConfigProvider.navBar.alignTitle('center');
 
       //增加连接调用白名单
-  $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|smsto|tel):/);
+  $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|smsto|tel|sms):/);
 
   $stateProvider
     .state('signin', {

@@ -9,7 +9,7 @@
     <link href="plugin/photoswipe/dist/default-skin/default-skin.css?v=4.0.7-1.0.4" rel="stylesheet" />
     <link href="css/style.css" rel="stylesheet">
     
-    <script src="cordova.js"></script>
+    <!-- <script src="cordova.js"></script>-->
    <!-- <script src="http:/192.168.3.105:8080/target/target-script-min.js#anonymous"></script>-->
     <script src="GetMMUI.js"></script>
     <script src="BaiduLoc.js"></script>
@@ -27,33 +27,8 @@
      document.addEventListener("deviceready", onDeviceReady, false); 
        // PhoneGap加载完毕
      function onDeviceReady() {
-         //document.addEventListener("backbutton", eventBackButton, false); //返回键
          startLocaltion();
      }
-
-         //返回键事件
-    function eventBackButton(){
-        //    if($.mobile.activePage.is('#loginpage')){//只有在登录页面才可以进行返回键操作。
-        //         if(num==0){
-        //          window.plugins.ToastPlugin.ShowToast('再点击一次退出!',3000);
-        //          num++;
-        //      }
-        //      else{//在3秒内再次按返回键即可退出系统
-        //          document.removeEventListener("backbutton", eventBackButton, false); //注销返回键
-        //          window.clearInterval(intervalID);
-        //          navigator.app.exitApp();
-        //        }
-        //      //3秒后重新进行退出确认
-        //      var intervalID = window.setInterval(function(){num = 0;},3000); 
-        //  }
-        //  else if($.mobile.activePage.is('#sitepiclistpage') || $.mobile.activePage.is('#siteprojectpicpage')) {
-        //     if($(".ps-toolbar-close").length>0){
-        //         $(".ps-toolbar-close").click();
-        //     }
-        //     //navigator.app.backHistory();
-          
-        // }
-    }  
     function startLocaltion()
     {
         window.Location(onLocSuccess, onLocError, 'get', 10000);  //利用百度定位SDK时启用
@@ -98,7 +73,6 @@
         },
         function() {
            navigator.notification.alert("打开微信异常", function(){},"错误提示","确定")
-            //console.log("failed");
           });
   }
     </script>
