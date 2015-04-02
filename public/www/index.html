@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html  ng-app="ionicApp">
+<html ng-app="ionicApp">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
@@ -9,8 +9,8 @@
     <link href="plugin/photoswipe/dist/default-skin/default-skin.css?v=4.0.7-1.0.4" rel="stylesheet" />
     <link href="css/style.css" rel="stylesheet">
     
-    <!-- <script src="cordova.js"></script>-->
-   <!-- <script src="http:/192.168.3.105:8080/target/target-script-min.js#anonymous"></script>-->
+    <script src="cordova.js"></script>
+   <!--<script src="http:/192.168.3.119:8080/target/target-script-min.js#anonymous"></script>-->
     <script src="GetMMUI.js"></script>
     <script src="BaiduLoc.js"></script>
     <script src="phonegap-toast.js"></script>
@@ -75,6 +75,12 @@
            navigator.notification.alert("打开微信异常", function(){},"错误提示","确定")
           });
   }
+  //从缓存中删除图片
+function deletePictureFromCache( imageURI ){
+  window.resolveLocalFileSystemURI(imageURI, function( fileEntry ){
+    fileEntry.remove();
+  }, null);
+}
     </script>
   </head>
   <body>

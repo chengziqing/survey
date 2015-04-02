@@ -1,10 +1,10 @@
 //外网
-//var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
-//var WEB_HOST = "http://www.share-net.cn:8081";
+var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
+var WEB_HOST = "http://www.share-net.cn:8081";
 
 //内网
-var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
-var WEB_HOST = "http://192.168.1.32:8081";
+//var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
+//var WEB_HOST = "http://192.168.1.32:8081";
 
 var USER_ID="";
 var SITE_STSTUS="00";
@@ -35,7 +35,8 @@ angular.module('ionicApp', ['ionic'])
     .state('tabs', {
       url: "/tab",
       abstract: true,
-      templateUrl: "templates/tabs.html"
+      templateUrl: "templates/tabs.html",
+      controller: 'TabsCtrl'
     })
     .state('tabs.wait', {
       url: "/wait",
@@ -308,7 +309,26 @@ angular.module('ionicApp', ['ionic'])
     return {color:''};
   };
 })
-.controller('SignInCtrl', function($scope, $state,$ionicPopup,$http,$ionicHistory,$ionicLoading) {
+.controller('NavBarCtrl',function($scope,$ionicHistory){
+  console.log('NavBarCtrl');
+  $scope.ClearCacheGoBack = function() {
+    $ionicHistory.clearCache();
+    $ionicHistory.goBack();
+  };
+})
+.controller('TabsCtrl',function($scope,$state){
+  console.log('TabsCtrl');
+  $scope.recover1 = function() {
+    $state.go("tabs.wait");
+  };
+  $scope.recover2 = function() {
+    $state.go("tabs.working");
+  };
+  $scope.recover3 = function() {
+    $state.go("tabs.already");
+  };
+})
+.controller('SignInCtrl', function($scope, $state,$ionicPopup,$http,$ionicLoading,$ionicPopup) {
   var loginForm = {
     username: window.localStorage.getItem("reais3_username")==null?"":window.localStorage.getItem("reais3_username"),
     password: window.localStorage.getItem("reais3_password")==null?"":window.localStorage.getItem("reais3_password"),
@@ -334,10 +354,11 @@ angular.module('ionicApp', ['ionic'])
         return
     }
     $ionicLoading.show({
-      template: 'Loading...'
+      template: '正在加载中...'
     });
     $http.jsonp(HTTP_HOST + "/GetUserInfo?username="+user.username+"&password="+user.password+"&jsoncallback=JSON_CALLBACK").
       success(function(data, status) {
+        $ionicLoading.hide();
         if (data.root.length == 0) {
           $ionicPopup.alert({
             title: '错误提示',
@@ -357,48 +378,47 @@ angular.module('ionicApp', ['ionic'])
           window.localStorage.setItem("reais3_password", "");
           window.localStorage.setItem("reais3_isSave", false);
         }
-        $ionicHistory.clearHistory();
-        $ionicLoading.hide();
         $state.go('tabs.wait');
       }).
       error(function(data, status) {
-        console.log("error");
+        $ionicLoading.hide();
+        network($ionicLoading,$ionicPopup);
     });
 
   };
   
 })
-.controller('WaitTabCtrl', function($scope,$http) {
+.controller('WaitTabCtrl', function($scope,$http,$ionicLoading,$ionicPopup) {
   console.log('WaitTabCtrl');
   $http.jsonp(HTTP_HOST+"/GetItemList?page=1&rolekind=7&currentstatus=0&userid="+USER_ID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;   
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 })
-.controller('WorkingTabCtrl',function($scope,$http,$timeout){
+.controller('WorkingTabCtrl',function($scope,$http,$timeout,$ionicLoading,$ionicPopup){
   console.log('WorkingTabCtrl');
   $http.jsonp(HTTP_HOST+"/GetItemList?page=1&rolekind=7&currentstatus=1&userid="+USER_ID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;   
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 })
-.controller('AlreadyTabCtrl', function($scope, $http) {
+.controller('AlreadyTabCtrl', function($scope, $http,$ionicLoading,$ionicPopup) {
   console.log('AlreadyTabCtrl');
   $http.jsonp(HTTP_HOST+"/GetItemList?page=1&rolekind=7&currentstatus=2&userid="+USER_ID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;   
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 })
-.controller('AccountTabCtrl', function($scope, $http,$ionicModal,$ionicPopup,$state) {
+.controller('AccountTabCtrl', function($scope, $http,$ionicModal,$state,$ionicLoading,$ionicPopup,$ionicHistory) {
   console.log('AccountTabCtrl');
   $ionicModal.fromTemplateUrl('templates/password.html', {scope: $scope}).then(function(modal) {
     $scope.modal = modal;
@@ -411,8 +431,10 @@ angular.module('ionicApp', ['ionic'])
           });
           return
       }
+      $ionicLoading.show({template: '正在加载中...'});
       $http.jsonp(HTTP_HOST + "/modifyPassword?&userid="+USER_ID+"&oldpass=" + e.oldPsd + "&newpass=" + e.newPsd +"&jsoncallback=JSON_CALLBACK").
       success(function(data, status) {
+        $ionicLoading.hide();
         if (data.result.toLowerCase()=="ok") {
           $ionicPopup.alert({
             title: '成功提示',
@@ -429,17 +451,19 @@ angular.module('ionicApp', ['ionic'])
         }
       }).
       error(function(data, status) {
-        console.log("error");
+        $ionicLoading.hide();
+        network($ionicLoading,$ionicPopup);
       });
     }
   });
   $scope.exit=function(){
     USER_ID="";
+    $ionicHistory.clearHistory();
     $state.go('signin');
 
   }
 })
-.controller('StationTabCtrl',function($scope,$http,$stateParams){
+.controller('StationTabCtrl',function($scope,$http,$stateParams,$ionicLoading,$ionicPopup){
   console.log('StationTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.ProjectId=$stateParams.ProjectId;
@@ -452,13 +476,14 @@ angular.module('ionicApp', ['ionic'])
       $scope.items=data.root;
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 })
-.controller('ContentTabCtrl',function($scope,$http,$stateParams,$ionicPopup){
+.controller('ContentTabCtrl',function($scope,$http,$stateParams,$ionicLoading,$ionicPopup){
   console.log('ContentTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
+  
   $scope.tip = function() {
       $ionicPopup.alert({
         title: '提示信息',
@@ -471,15 +496,19 @@ angular.module('ionicApp', ['ionic'])
       $scope.item=data.root[0];
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 })
-.controller('CheckinTabCtrl',function($scope,$stateParams,$http,$ionicPopup,$timeout){
+.controller('CheckinTabCtrl',function($scope,$stateParams,$http,$timeout,$ionicLoading,$ionicPopup){
   console.log('CheckinTabCtrl');
   $scope.checkintext="开始签到";
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
-  
+
+  $scope.displaySubmitBtn=true;
+  if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
+    $scope.displaySubmitBtn = false;
+  }
   $timeout(function() {
     var map = new BMap.Map("map"); 
     function LocationControl(){      
@@ -513,9 +542,10 @@ angular.module('ionicApp', ['ionic'])
     }
     var myLocationControl = new LocationControl();           
     map.addControl(myLocationControl); 
-
+    $ionicLoading.show({template: '正在加载中...'});
     $http.jsonp(HTTP_HOST + "/GetSiteSign?TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
+      $ionicLoading.hide();
       if (data.root[0].SignLng != "" && data.root[0].SignLat != "") {
         $scope.checkintext="重新签到";
         point = new BMap.Point(parseFloat(data.root[0].SignLng), parseFloat(data.root[0].SignLat));
@@ -532,7 +562,8 @@ angular.module('ionicApp', ['ionic'])
       }
     }).
     error(function(data, status) {
-      console.log("error");
+      $ionicLoading.hide();
+      network($ionicLoading,$ionicPopup);
     });
 
   }, 500);
@@ -540,8 +571,10 @@ angular.module('ionicApp', ['ionic'])
 
 
   $scope.checkin=function(e){
+    $ionicLoading.show({template: '正在加载中...'});
     $http.jsonp(WEB_HOST+"/Public/goSign.aspx?UserId="+USER_ID+"&ProjectId="+PROJECT_ID+"&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&SignLng="+NowLocation.SignLng+"&SignLat="+NowLocation.SignLat+"&Altitude="+NowLocation.Altitude+"&jsoncallback=JSON_CALLBACK").
       success(function(data, status) {
+        $ionicLoading.hide();
         if (data.result.toLowerCase()=="ok") {
           $ionicPopup.alert({
             title: '提示信息',
@@ -558,11 +591,12 @@ angular.module('ionicApp', ['ionic'])
         }
       }).
       error(function(data, status) {
-        console.log("error");
+        $ionicLoading.hide();
+        network($ionicLoading,$ionicPopup);
     });
   }
 })
-.controller('InfotypesTabCtrl',function($scope,$http,$stateParams,$ionicHistory,$ionicPopup){
+.controller('InfotypesTabCtrl',function($scope,$http,$stateParams,$ionicHistory,$ionicLoading,$ionicPopup){
   console.log('InfotypesTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
@@ -579,9 +613,10 @@ angular.module('ionicApp', ['ionic'])
     });
     confirmPopup.then(function(res) {
       if (res) {
+        $ionicLoading.show({template: '正在加载中...'});
         $http.jsonp(HTTP_HOST + "/TaskFormStatusSubmit?UserId=" + USER_ID + "&SiteId=" + $scope.SiteId + "&TaskId=" + $scope.TaskId + "&jsoncallback=JSON_CALLBACK").
         success(function(data, status) {
-          console.log(data);
+          $ionicLoading.hide();
           if (data.result.toLowerCase()=="ok") {
             $ionicHistory.clearCache();
             $ionicHistory.goBack();
@@ -594,23 +629,24 @@ angular.module('ionicApp', ['ionic'])
           }
         }).
         error(function(data, status) {
-          console.log("error");
+          $ionicLoading.hide();
+          network($ionicLoading,$ionicPopup);
         });
       } else {
         console.log('You are not sure');
       }
     });
   }
-  $http.jsonp(HTTP_HOST+"/GetTaskInfoTypes?TaskId="+$scope.TaskId+"&jsoncallback=JSON_CALLBACK").
+  $http.jsonp(HTTP_HOST+"/GetTaskInfoTypes?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 
 })
-.controller('FormTabCtrl',function($scope,$http,$stateParams){
+.controller('FormTabCtrl',function($scope,$http,$stateParams,$ionicLoading,$ionicPopup){
   console.log('FormTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
@@ -620,17 +656,16 @@ angular.module('ionicApp', ['ionic'])
   if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
     $scope.displayHref=false;
   }
-
   $http.jsonp(HTTP_HOST+"/GetTaskPropertys?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&TypeID="+$scope.TypeID+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 
 })
-.controller('GroupFormTabCtrl',function($scope,$http,$stateParams){
+.controller('GroupFormTabCtrl',function($scope,$http,$stateParams,$ionicLoading,$ionicPopup){
   console.log('GroupFormTabCtrl');
 
   $scope.TaskId=$stateParams.TaskId;
@@ -644,24 +679,16 @@ angular.module('ionicApp', ['ionic'])
   if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
     $scope.displayHref=false;
   }
-
   $http.jsonp(HTTP_HOST+"/GetTaskPropertyControl?TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&TypeID="+$scope.TypeID+"&PropertyID="+$scope.PropertyID+"&IsPropertyGroup="+$scope.IsPropertyGroup+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 
 })
-.controller('NavBarCtrl',function($scope,$ionicHistory){
-  console.log('NavBarCtrl');
-  $scope.ClearCacheGoBack = function() {
-    $ionicHistory.clearCache();
-    $ionicHistory.goBack();
-  };
-})
-.controller('BaseFormTabCtrl',function($scope,$http,$stateParams,$ionicHistory,$ionicPopup){
+.controller('BaseFormTabCtrl',function($scope,$http,$stateParams,$ionicHistory,$ionicLoading,$ionicPopup){
   console.log('BaseFormTabCtrl');
   $scope.title=$stateParams.PropertylName;
 
@@ -824,15 +851,18 @@ angular.module('ionicApp', ['ionic'])
         break;
     }
     //发送数据到后台服务器
+    $ionicLoading.show({template: '正在加载中...'});
     $http.jsonp(HTTP_HOST+"/TaskFormDataUpload?UserId="+USER_ID+"&ProjectId="+PROJECT_ID+"&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&PropertyID="+$scope.PropertyID+"&PropertylName="+$scope.PropertylName+"&PropertyInstance_Value="+inputValue+"&jsoncallback=JSON_CALLBACK").
       success(function(data, status) {
+         $ionicLoading.hide();
          if (data.result.toLowerCase()=="ok") {
           $ionicHistory.clearCache();
           $ionicHistory.goBack();
          }
       }).
       error(function(data, status) {
-        console.log("error");
+        $ionicLoading.hide();
+        network($ionicLoading,$ionicPopup);
     });
   };
   //从后台获取表单类型
@@ -883,11 +913,11 @@ angular.module('ionicApp', ['ionic'])
       }
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 
 })
-.controller('ImagetypesTabCtrl',function($scope,$stateParams,$http){
+.controller('ImagetypesTabCtrl',function($scope,$stateParams,$http,$ionicLoading,$ionicPopup){
   console.log('ImagetypesTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
@@ -896,10 +926,10 @@ angular.module('ionicApp', ['ionic'])
       $scope.items=data.root;
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 })
-.controller('ImageupTabCtrl',function($scope,$stateParams,$http,$ionicModal,$ionicPopup){
+.controller('ImageupTabCtrl',function($scope,$stateParams,$http,$ionicModal,$ionicLoading,$ionicPopup){
   console.log('ImageupTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
@@ -913,13 +943,12 @@ angular.module('ionicApp', ['ionic'])
     $scope.displayHref=false;
   }
 
-
   $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
   $ionicModal.fromTemplateUrl('templates/imageupmodal.html?9', {scope: $scope}).then(function(modal) {
     $scope.modal = modal;
@@ -928,6 +957,7 @@ angular.module('ionicApp', ['ionic'])
     $scope.cameraEvent=function(e){
       console.log("相机");
       //判断图片是否填写名称
+
       if (modal.PicName=="") {
           $ionicPopup.alert({
             title: '错误提示',
@@ -954,26 +984,35 @@ angular.module('ionicApp', ['ionic'])
         fuOptions.mimeType = "multipart/form-data";
         fuOptions.params = params; 
         var ft = new FileTransfer();
-        ft.onprogress = showUploadingProgress;
-        navigator.notification.progressStart("", "当前上传进度");
+        $ionicLoading.show({template: '上传中,请等待...'});
 
         ft.upload(imageURI, encodeURI(WEB_HOST + '/Public/uploadfile.aspx'), function(r) {
-          navigator.notification.progressStop();
+          $ionicLoading.hide();
+          try {
+            deletePictureFromCache(imageURI);
+          } catch (e){
+            $ionicPopup.alert({
+              title: '错误提示',
+              template: e.message,
+              okText:"确定"
+            });
+          }
           var result=JSON.parse(r.response);
           if (result.result.toLowerCase() == "ok") {
-            $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
-              success(function(data, status) {
-                $scope.items=data.root;
-              }).
-              error(function(data, status) {
-                console.log("error");
-            });
+            modal.PicName="";
             $ionicPopup.alert({
               title: '成功提示',
               template: "图片上传成功!",
               okText:"确定"
             }); 
-            modal.PicName="";
+            $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
+              success(function(data, status) {
+                $ionicLoading.hide();
+                $scope.items=data.root;
+              }).
+              error(function(data, status) {
+                console.log(data);
+            });            
           } else {
             $ionicPopup.alert({
               title: '错误提示',
@@ -981,12 +1020,15 @@ angular.module('ionicApp', ['ionic'])
               okText:"确定"
             });
           }
-          //删除上传的图片
-          deletePictureFromCache(imageURI);
         }, null, fuOptions);
-
       }, function(error) {
-        console.log('Error');
+        //上传错误
+        $ionicLoading.hide();
+        $ionicPopup.alert({
+          title: '错误提示',
+          template: '上传失败',
+          okText:"确定"
+        });
       }, options);
 
     };
@@ -1018,26 +1060,26 @@ angular.module('ionicApp', ['ionic'])
         fuOptions.mimeType = "multipart/form-data";
         fuOptions.params = params; 
         var ft = new FileTransfer();
-        ft.onprogress = showUploadingProgress;
-        navigator.notification.progressStart("", "当前上传进度");
+
+        $ionicLoading.show({template: '上传中,请等待...'});
 
         ft.upload(imageURI, encodeURI(WEB_HOST + '/Public/uploadfile.aspx'), function(r) {
-          navigator.notification.progressStop();
+          $ionicLoading.hide();
           var result=JSON.parse(r.response);
           if (result.result.toLowerCase() == "ok") {
-             $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
-              success(function(data, status) {
-                $scope.items=data.root;
-              }).
-              error(function(data, status) {
-                console.log("error");
-            });
+            modal.PicName="";
             $ionicPopup.alert({
               title: '成功提示',
               template: "图片上传成功!",
               okText:"确定"
             }); 
-            modal.PicName="";
+             $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
+              success(function(data, status) {
+                $scope.items=data.root;
+              }).
+              error(function(data, status) {
+                console.log(data);
+            });           
           } else {
             $ionicPopup.alert({
               title: '错误提示',
@@ -1048,7 +1090,13 @@ angular.module('ionicApp', ['ionic'])
         }, null, fuOptions);
 
       }, function(error) {
-        console.log('Error');
+        //上传错误
+        $ionicLoading.hide();
+        $ionicPopup.alert({
+          title: '错误提示',
+          template: '上传失败',
+          okText:"确定"
+        });
       }, options);
     };
   });
@@ -1061,7 +1109,6 @@ angular.module('ionicApp', ['ionic'])
     $scope.modal.show();
   }
   $scope.delImage=function(e){
-
     var confirmPopup = $ionicPopup.confirm({
       title: '确认提示',
       template: '确定删除(' + e.PicName + '),这张图片吗?',
@@ -1070,15 +1117,18 @@ angular.module('ionicApp', ['ionic'])
     });
     confirmPopup.then(function(res) {
       if (res) {
+          $ionicLoading.show({template: '正在加载中...'});
           $http.jsonp(WEB_HOST+"/Public/DelPicture.aspx?PicId="+e.PicId+"&jsoncallback=JSON_CALLBACK").
             success(function(data, status) {
+                $ionicLoading.hide();
                 if (data.result.toLowerCase()=="ok") {
                   $http.jsonp(HTTP_HOST+"/getSitePicName?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&DirectoryID="+$scope.DirectoryID+"&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
                     success(function(data, status) {
+                      $ionicLoading.hide();
                       $scope.items=data.root;
                     }).
                     error(function(data, status) {
-                      console.log("error");
+                      console.log(data);
                   });
                 }else{
                   $ionicPopup.alert({
@@ -1089,7 +1139,7 @@ angular.module('ionicApp', ['ionic'])
                 }
             }).
             error(function(data, status) {
-              console.log("error");
+              network($ionicLoading,$ionicPopup);
           });
       } else {
         console.log('You are not sure');
@@ -1108,13 +1158,9 @@ angular.module('ionicApp', ['ionic'])
         }
         var image = {
           src: WEB_HOST + $scope.items[i].PicPath,
-          w: 450,
-          h: 600
+          w: $scope.items[i].w,
+          h: $scope.items[i].h
         }
-        imgReady(image.src, function() {
-          image.w = this.width;
-          image.h = this.height;
-        });
         items.push(image);
       }
     }
@@ -1134,7 +1180,7 @@ angular.module('ionicApp', ['ionic'])
     gallery.init();
   }
 })
-.controller('ImagelistTabCtrl',function($scope,$stateParams,$http,$ionicModal,$ionicPopup){
+.controller('ImagelistTabCtrl',function($scope,$stateParams,$http,$ionicModal,$ionicLoading,$ionicPopup){
   console.log('ImagelistTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
@@ -1175,28 +1221,22 @@ angular.module('ionicApp', ['ionic'])
         fuOptions.mimeType = "multipart/form-data";
         fuOptions.params = params; 
         var ft = new FileTransfer();
-        ft.onprogress = showUploadingProgress;
-        navigator.notification.progressStart("", "当前上传进度");
 
+        $ionicLoading.show({template: '上传中,请等待...'});
         ft.upload(imageURI, encodeURI(WEB_HOST + '/Public/uploadfile.aspx'), function(r) {
-          navigator.notification.progressStop();
+          $ionicLoading.hide();
+          deletePictureFromCache(imageURI);
           var result=JSON.parse(r.response);
           if (result.result.toLowerCase() == "ok") {
-            //deletePictureFromCache(imageURI);
-            console.log(result);
             $http.jsonp(HTTP_HOST + "/getSitePicName?&page=1&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&DirectoryID=" + $scope.DirectoryID + "&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
             success(function(data, status) {
               $scope.items = data.root;
             }).
             error(function(data, status) {
-              console.log("error");
+              console.log(data);
             });
-            console.log("获取成功");
-            //拍照成功,询问是否拍下一张图片
-            console.log(modal.PicId);
             $http.jsonp(HTTP_HOST + "/getSitePicName?&page=1&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&DirectoryID=" + $scope.DirectoryID + "&PicId=" + modal.PicId + "&IsNextPic=1&jsoncallback=JSON_CALLBACK").
              success(function(data, status) {
-              console.log(data);
               if (data.root.length == 0) {
                 modal.hide();
                 return
@@ -1224,11 +1264,7 @@ angular.module('ionicApp', ['ionic'])
               });
             }).
             error(function(data, status) {
-              $ionicPopup.alert({
-                title: '错误提示',
-                template: '上传图片错误',
-                okText:"确定"
-              });
+              console.log(data);
               return
             });
             console.log("//结束");
@@ -1243,7 +1279,12 @@ angular.module('ionicApp', ['ionic'])
         }, null, fuOptions);
 
       }, function(error) {
-        console.log('Error');
+        $ionicLoading.hide();
+        $ionicPopup.alert({
+          title: '错误提示',
+          template: '上传失败',
+          okText:"确定"
+        });
       }, options);
 
     };
@@ -1266,26 +1307,20 @@ angular.module('ionicApp', ['ionic'])
         fuOptions.mimeType = "multipart/form-data";
         fuOptions.params = params; 
         var ft = new FileTransfer();
-        ft.onprogress = showUploadingProgress;
-        navigator.notification.progressStart("", "当前上传进度");
+        $ionicLoading.show({template: '上传中,请等待...'});
         ft.upload(imageURI, encodeURI(WEB_HOST + '/Public/uploadfile.aspx'), function(r) {
-          navigator.notification.progressStop();
+          $ionicLoading.hide();
           var result = JSON.parse(r.response);
           if (result.result.toLowerCase() == "ok") {
-            console.log(result);
             $http.jsonp(HTTP_HOST + "/getSitePicName?&page=1&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&DirectoryID=" + $scope.DirectoryID + "&PicId=&IsNextPic=0&jsoncallback=JSON_CALLBACK").
             success(function(data, status) {
               $scope.items = data.root;
             }).
             error(function(data, status) {
-              console.log("error");
+              console.log(data);
             });
-            console.log("获取成功");
-            //拍照成功,询问是否拍下一张图片
-            console.log(modal.PicId);
             $http.jsonp(HTTP_HOST + "/getSitePicName?&page=1&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&DirectoryID=" + $scope.DirectoryID + "&PicId=" + modal.PicId + "&IsNextPic=1&jsoncallback=JSON_CALLBACK").
             success(function(data, status) {
-              console.log(data);
               if (data.root.length == 0) {
                 modal.hide();
                 return
@@ -1312,14 +1347,8 @@ angular.module('ionicApp', ['ionic'])
               });
             }).
             error(function(data, status) {
-              $ionicPopup.alert({
-                title: '错误提示',
-                template: '上传图片错误',
-                okText: "确定"
-              });
-              return
+              console.log(data);
             });
-            console.log("//结束");
           } else {
             $ionicPopup.alert({
               title: '错误提示',
@@ -1332,7 +1361,12 @@ angular.module('ionicApp', ['ionic'])
         }, null, fuOptions);
 
       }, function(error) {
-        console.log('Error');
+        $ionicLoading.hide();
+        $ionicPopup.alert({
+          title: '错误提示',
+          template: '上传失败',
+          okText:"确定"
+        });
       }, options);
     };
   });
@@ -1342,7 +1376,7 @@ angular.module('ionicApp', ['ionic'])
       $scope.items=data.root;
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 
   $scope.upImage=function(e){
@@ -1362,13 +1396,9 @@ angular.module('ionicApp', ['ionic'])
         }
         var image = {
           src: WEB_HOST + $scope.items[i].PicPath,
-          w: 450,
-          h: 600
+          w:  $scope.items[i].w,
+          h:  $scope.items[i].h
         }
-        imgReady(image.src, function() {
-          image.w = this.width;
-          image.h = this.height;
-        });
         items.push(image);
       }
     }
@@ -1389,7 +1419,7 @@ angular.module('ionicApp', ['ionic'])
   }
 
 })
-.controller('PeriodTabCtrl',function($scope,$stateParams,$http,$ionicPopup,$ionicHistory){
+.controller('PeriodTabCtrl',function($scope,$stateParams,$http,$ionicHistory,$ionicLoading,$ionicPopup){
   console.log('PeriodTabCtrl');
   $scope.TaskId=$stateParams.TaskId;
   $scope.SiteId=$stateParams.SiteId;
@@ -1408,8 +1438,10 @@ angular.module('ionicApp', ['ionic'])
     });
     confirmPopup.then(function(res) {
       if (res) {
+        $ionicLoading.show({template: '正在加载中...'});
         $http.jsonp(HTTP_HOST + "/SetCurrentPropertyValue?&FromTaskId="+e.TaskId+"&ToTaskId=" + $scope.TaskId + "&ToSiteId="+$scope.SiteId+"&jsoncallback=JSON_CALLBACK").
         success(function(data, status) {
+          $ionicLoading.hide();
           if (data.result.toLowerCase()=="ok") {
             $ionicHistory.clearCache();
             $ionicHistory.goBack();
@@ -1422,7 +1454,7 @@ angular.module('ionicApp', ['ionic'])
           }
         }).
         error(function(data, status) {
-          console.log("error");
+          network($ionicLoading,$ionicPopup);
         });
       } else {
         console.log('You are not sure');
@@ -1434,21 +1466,29 @@ angular.module('ionicApp', ['ionic'])
       $scope.items=data.root;
     }).
     error(function(data, status) {
-      console.log("error");
+      network($ionicLoading,$ionicPopup);
   });
 })
-.controller('TalkTabCtrl',function($scope,$stateParams,$http){
+.controller('TalkTabCtrl',function($scope,$stateParams,$http,$ionicLoading,$ionicPopup){
   console.log('TalkTabCtrl');
   $scope.TaskId = $stateParams.TaskId;
   $scope.doWeixin=function(e){
     startMMUI();
   }
-
   $http.jsonp(HTTP_HOST + "/getTaskMemberList?&TaskId="+$scope.TaskId+"&jsoncallback=JSON_CALLBACK").
   success(function(data, status) {
     $scope.items = data.root;
   }).
   error(function(data, status) {
-    console.log("error");
+    network($ionicLoading,$ionicPopup);
   });
 });
+
+
+var network = function($ionicLoading, $ionicPopup) {
+  $ionicPopup.alert({
+    title: '<strong>错误信息</strong>',
+    template: '服务请求异常!',
+    okText:"确定"
+  });
+}
