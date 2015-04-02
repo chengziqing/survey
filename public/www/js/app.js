@@ -1461,7 +1461,7 @@ angular.module('ionicApp', ['ionic'])
       }
     });
   }
-  $http.jsonp(HTTP_HOST+"/GetHistoryTask?&page=1&&TaskId="+$scope.TaskId+"SiteId="+$scope.SiteId+"&jsoncallback=JSON_CALLBACK").
+  $http.jsonp(HTTP_HOST+"/GetHistoryTask?&page=1&TaskId="+$scope.TaskId+"SiteId="+$scope.SiteId+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).
