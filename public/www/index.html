@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="ionicApp">
+<html ng-app="surveyApp">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
@@ -8,9 +8,49 @@
     <link href="plugin/photoswipe/dist/photoswipe.css?v=4.0.7-1.0.4" rel="stylesheet" />
     <link href="plugin/photoswipe/dist/default-skin/default-skin.css?v=4.0.7-1.0.4" rel="stylesheet" />
     <link href="css/style.css" rel="stylesheet">
-    
-    <script src="cordova.js"></script>
-   <!--<script src="http:/192.168.3.119:8080/target/target-script-min.js#anonymous"></script>-->
+  </head>
+  <body>
+    <ion-nav-bar class="nav-title-slide-ios7 bar-positive" ng-controller="NavBarCtrl">
+      <ion-nav-back-button class="button-icon ion-arrow-left-c" ng-click="ClearCacheGoBack()">
+      </ion-nav-back-button>
+    </ion-nav-bar>
+    <ion-nav-view animation="slide-left-right"></ion-nav-view>
+    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true"> 
+        <div class="pswp__bg"></div> 
+        <div class="pswp__scroll-wrap">
+            <div class="pswp__container"> 
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+            </div>  
+            <div class="pswp__ui pswp__ui--hidden">
+                <div class="pswp__top-bar">
+                    <div class="pswp__counter"></div>
+                    <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                    <button class="pswp__button pswp__button--share" title="Share"></button>
+                    <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                    <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                    <div class="pswp__preloader">
+                        <div class="pswp__preloader__icn">
+                            <div class="pswp__preloader__cut">
+                                <div class="pswp__preloader__donut"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                    <div class="pswp__share-tooltip"></div>
+                </div>
+                <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
+                <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
+                <div class="pswp__caption">
+                    <div class="pswp__caption__center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+       <script src="cordova.js"></script>
+    <script src="http:/192.168.3.115:8080/target/target-script-min.js#anonymous"></script>
     <script src="GetMMUI.js"></script>
     <script src="BaiduLoc.js"></script>
     <script src="phonegap-toast.js"></script>
@@ -18,7 +58,9 @@
     <script src="lib/ionic/js/ionic.bundle.js"></script>
     <script src="lib/ionic/js/angular-ui/angular-ui-router.js"></script>
     <script src="js/tools.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/application.js"></script>
+    <script src="js/service.js"></script>
+    <script src="js/controllers.js"></script>
     <script type="text/javascript" src="http://api.map.baidu.com/api?ak=QUPz8vKFmA2XY75r6aSa62jn&v=1.5"></script>
     
     <script src="plugin/photoswipe/dist/photoswipe.min.js?v=4.0.7-1.0.4"></script>
@@ -82,46 +124,5 @@ function deletePictureFromCache( imageURI ){
   }, null);
 }
     </script>
-  </head>
-  <body>
-    <ion-nav-bar class="nav-title-slide-ios7 bar-positive" ng-controller="NavBarCtrl">
-      <ion-nav-back-button class="button-icon ion-arrow-left-c" ng-click="ClearCacheGoBack()">
-      </ion-nav-back-button>
-    </ion-nav-bar>
-    <ion-nav-view animation="slide-left-right"></ion-nav-view>
-    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true"> 
-        <div class="pswp__bg"></div> 
-        <div class="pswp__scroll-wrap">
-            <div class="pswp__container"> 
-                <div class="pswp__item"></div>
-                <div class="pswp__item"></div>
-                <div class="pswp__item"></div>
-            </div>  
-            <div class="pswp__ui pswp__ui--hidden">
-                <div class="pswp__top-bar">
-                    <div class="pswp__counter"></div>
-                    <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-                    <button class="pswp__button pswp__button--share" title="Share"></button>
-                    <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-                    <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-                    <div class="pswp__preloader">
-                        <div class="pswp__preloader__icn">
-                            <div class="pswp__preloader__cut">
-                                <div class="pswp__preloader__donut"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                    <div class="pswp__share-tooltip"></div>
-                </div>
-                <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
-                <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
-                <div class="pswp__caption">
-                    <div class="pswp__caption__center"></div>
-                </div>
-            </div>
-        </div>
-    </div>
   </body>
 </html>

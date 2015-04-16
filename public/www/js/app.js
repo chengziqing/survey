@@ -1,10 +1,10 @@
 //外网
-var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
+//var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
 var WEB_HOST = "http://www.share-net.cn:8081";
 
 //内网
-//var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
-//var WEB_HOST = "http://192.168.1.32:8081";
+var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
+var WEB_HOST = "http://192.168.1.32:8081";
 
 var USER_ID="";
 var SITE_STSTUS="00";
@@ -1461,7 +1461,7 @@ angular.module('ionicApp', ['ionic'])
       }
     });
   }
-  $http.jsonp(HTTP_HOST+"/GetHistoryTask?&page=1&TaskId="+$scope.TaskId+"SiteId="+$scope.SiteId+"&jsoncallback=JSON_CALLBACK").
+  $http.jsonp(HTTP_HOST+"/GetHistoryTask?&page=1&TaskId="+$scope.TaskId+"&SiteId="+$scope.SiteId+"&jsoncallback=JSON_CALLBACK").
     success(function(data, status) {
       $scope.items=data.root;
     }).

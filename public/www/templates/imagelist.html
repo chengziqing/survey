@@ -4,12 +4,12 @@
     	<ion-item ng-repeat="item in items"
             class="item-thumbnail-left">
     		<img src="img/nopic.png" ng-if="item.SmallPicPath==''">
-            <img ng-src="{{web_host}}{{item.SmallPicPath}}" ng-if="item.SmallPicPath!=''" ng-click="photoSwipe(item)"> 
+            <img ng-src="{{item.SmallPicPath | localpicture}}" ng-if="item.SmallPicPath!=''" ng-click="photoSwipe(item)"> 
     		<h2>{{item.PicName}}</h2>
     		<p ng-style="item.PicStatus | imagecheckstatuscolor">{{item.PicStatus | imagecheckstatus}}</p>
             <p>{{item.UploadDate}}</p>
     		<ion-option-button class="icon-left ion-plus-circled button-balanced"
-                       ng-click="upImage(item)" ng-if="displayHref && (item.PicStatus!='2')">上传</ion-option-button>
+                       ng-click="upImage(item)" ng-if="displayHref && (item.PicStatus!='2')">选择</ion-option-button>
     	</ion-item>
     </ion-list>
 </ion-content>

@@ -1,30 +1,18 @@
 <!DOCTYPE html>
-<html  ng-app="ionicApp">
+<html ng-app="surveyApp">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
     <title></title>
-    <link href="plugin/mobiscroll/mobiscroll.custom-2.6.2.min.css" rel="stylesheet">
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    <script src="plugin/jquery/jquery-1.9.1.min.js"></script>
-    <script src="plugin/mobiscroll/mobiscroll.custom-2.6.2.min.js"></script>
+  </head>
   <body>
-    <input type="text" id="hellodate" value="2015-03-25">
+    <ion-nav-bar class="nav-title-slide-ios7 bar-positive" ng-controller="NavBarCtrl">
+      <ion-nav-back-button class="button-icon ion-arrow-left-c">
+      </ion-nav-back-button>
+    </ion-nav-bar>
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+    <script src="js/demo.js"></script>
   </body>
-  <script type="text/javascript">
-   var dateopt = {
-        preset: 'date', //日期
-        theme: 'android', //皮肤样式
-        display: 'modal', //显示方式 
-        mode:  'scroller', //日期选择模式
-        dateFormat: 'yyyy-mm-dd', // 日期格式
-        setText: '确定', //确认按钮名称
-        cancelText: '取消',//取消按钮名籍我
-        dateOrder: 'yyyymmdd', //面板中日期排列格式
-        dayText: '日', monthText: '月', yearText: '年', //面板中年月日文字
-        lang: 'zh',
-        endYear:2020 //结束年份
-    };
-    $('#hellodate').mobiscroll(dateopt);
-  </script>
 </html>
