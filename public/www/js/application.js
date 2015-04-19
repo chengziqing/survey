@@ -1,10 +1,10 @@
 //外网
-//var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
-//var WEB_HOST = "http://www.share-net.cn:8081";
+var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
+var WEB_HOST = "http://www.share-net.cn:8081";
 
 //内网
-var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
-var WEB_HOST = "http://192.168.1.32:8081";
+//var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
+//var WEB_HOST = "http://192.168.1.32:8081";
 
 var USER_ID="";
 var SITE_STSTUS="00";
@@ -127,7 +127,7 @@ surveyApp.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvid
 				}
 			})
 			.state('tabs.baseform', {
-				url: "/baseform/:TaskId/:SiteId/:TypeID/:PropertyID/:IsPropertyGroup/:PropertylName",
+				url: "/baseform/:TaskId/:SiteId/:TypeID/:PropertyID/:IsPropertyGroup/:PropertylName/:GroupPropertyID",
 				views: {
 					'working-tab': {
 						templateUrl: "templates/baseform.html",

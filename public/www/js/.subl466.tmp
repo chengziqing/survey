@@ -754,22 +754,19 @@ surveyServices.service("ReaisService", ["$http", function($http) {
 									});
 								})(obj.TaskId);
 							}
-							//监测下载进度
 							var sh;
-							var n = window.LS.length();
-							var checkLSLength = function() {
-								var m = window.LS.length();
-								console.log(n + "," + m);
-								if (n == m) {
-									clearInterval(sh);
-									success({
-										result: "ok"
-									});
-								} else {
-									n = m;
+							var n = 1;
+							var checkLSLength =function(){
+								if (n == 1) {
+									n = window.LS.length;
 								}
+								if (n==window.LS.length) {
+
+								}
+								clearInterval(sh);
 							}
 							sh = window.setInterval(checkLSLength, 1000);
+							success({result:"ok"});
 						}).
 						error(function(data) {
 							error({result:"error"});
@@ -819,26 +816,14 @@ surveyServices.service("ReaisService", ["$http", function($http) {
 						}, null, fuOptions);
 					}
 				});
-				//监测下载进度
-				var sh;
-				var n = window.LS.length();
-				var checkLSLength = function() {
-					var m = window.LS.length();
-					console.log(n + "," + m);
-					if (n == m) {
-						clearInterval(sh);
-						window.LS.each(function(key,value) {
-							//若包含用户离线数据,则移除
-							if (key.indexOf(USER_ID) != -1) {
-								window.LS.remove(key);
-							}
-						});
-						success({result:"ok"});
-					} else {
-						n = m;
+
+				window.LS.each(function(key,value) {
+					//若包含用户离线数据,则移除
+					if (key.indexOf(USER_ID) != -1) {
+						window.LS.remove(key);
 					}
-				}
-				sh = window.setInterval(checkLSLength, 1000);
+				});
+				success({result:"ok"});
 			}
 		}
 	}

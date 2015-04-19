@@ -1,7 +1,7 @@
 <ion-view title="信息内容">
 	<ion-content>
 	<div ng-repeat="item in items">
-		<a class="item item-input item-icon-right" ng-if="(item.IsPropertyGroup=='0') && displayHref" ng-href="#/tab/baseform/{{item.TaskId}}/{{SiteId}}/{{item.TypeID}}/{{item.PropertyID}}/{{item.IsPropertyGroup}}/{{item.PropertylName}}">
+		<a class="item item-input item-icon-right" ng-if="(item.IsPropertyGroup=='0') && displayHref" ng-href="#/tab/baseform/{{item.TaskId}}/{{SiteId}}/{{item.TypeID}}/{{item.PropertyID}}/{{item.IsPropertyGroup}}/{{item.PropertylName}}/0">
 			<span class="input-label">{{item.PropertylName}}</span> 
 			<input type="text" id="{{item.IsPropertyGroup}}" readonly="readonly" style="background-color:#ffffff;cursor:default" value="{{item.Defaults | strnowtodate}}"> 
 		</a>

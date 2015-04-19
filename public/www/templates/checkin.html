@@ -1,8 +1,18 @@
+
 <ion-view title="签到">
 	<ion-nav-buttons side="secondary">
 		<button class="button" ng-click="checkin()" ng-if="displaySubmitBtn">{{checkintext}}</button>
 	</ion-nav-buttons>
 	<ion-content>
-		<div id="map" data-tap-disabled="true"></div>
+		<div id="map" data-tap-disabled="true"  ng-if="!offline"></div>
+	    <div class="list card" ng-if="offline">
+	    	<div class="item item-avatar item-button-right">
+	    		<img src="img/map.png">		    
+	    		<h2>签到位置</h2>
+	    		<p>经度:{{SignLng}} 纬度:{{SignLat}}</p>
+	    		   <button class="button button-positive" ng-click="reLocation()"> <i class="icon ion-ios-location"></i>
+	    		   </button>
+	    	</div>
+	    </div>
 	</ion-content>
 </ion-view>

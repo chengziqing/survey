@@ -202,86 +202,100 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('CheckinTabCtrl', function($scope, $stateParams, $http, $timeout, $ionicLoading, $ionicPopup) {
+	surveyControllers.controller('CheckinTabCtrl', function($scope, $stateParams, $http, $timeout, $ionicLoading, $ionicPopup,ReaisService) {
 		console.log('CheckinTabCtrl');
 		$scope.checkintext = "开始签到";
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.SiteId = $stateParams.SiteId;
 
+		var offline = window.LS.get("reais3_offline_" + USER_ID) == null ? {
+			checked: false
+		} : JSON.parse(window.LS.get("reais3_offline_" + USER_ID));
+
+		$scope.offline = offline.checked;
+
 		$scope.displaySubmitBtn = true;
 		if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
 			$scope.displaySubmitBtn = false;
 		}
-		$timeout(function() {
-			var map = new BMap.Map("map");
+		if (!offline.checked) {
+			$timeout(function() {
+				var map = new BMap.Map("map");
 
-			function LocationControl() {
-				// 设置默认停靠位置和偏移量    
-				this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
-				this.defaultOffset = new BMap.Size(10, 10);
-			}
-			LocationControl.prototype = new BMap.Control();
-			LocationControl.prototype.initialize = function(map) {
-				var div = document.createElement("div");
-				div.style.cursor = "pointer";
-				div.style.width = "36px";
-				div.style.height = "36px";
-				div.style.background = "url(img/location.png) -288px 0px no-repeat";
-				div.onmouseover = function(e) {
-					div.style.background = "url(img/location.png) -324px 0px no-repeat";
-				};
-				div.onmouseout = function(e) {
+				function LocationControl() {
+					// 设置默认停靠位置和偏移量    
+					this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
+					this.defaultOffset = new BMap.Size(10, 10);
+				}
+				LocationControl.prototype = new BMap.Control();
+				LocationControl.prototype.initialize = function(map) {
+					var div = document.createElement("div");
+					div.style.cursor = "pointer";
+					div.style.width = "36px";
+					div.style.height = "36px";
 					div.style.background = "url(img/location.png) -288px 0px no-repeat";
-				};
-				div.onclick = function(e) {
-					console.log('重新定位');
-					map.clearOverlays();
-					var p = new BMap.Point(parseFloat(NowLocation.SignLng), parseFloat(NowLocation.SignLat));
-					var marker = new BMap.Marker(p);
-					map.addOverlay(marker);
-					map.centerAndZoom(p, 17);
-				};
-				map.getContainer().appendChild(div);
-				return div;
-			}
-			var myLocationControl = new LocationControl();
-			map.addControl(myLocationControl);
-			$ionicLoading.show({
-				template: '正在加载中...'
-			});
-			$http.jsonp(HTTP_HOST + "/GetSiteSign?TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&jsoncallback=JSON_CALLBACK").
-			success(function(data, status) {
-				$ionicLoading.hide();
+					div.onmouseover = function(e) {
+						div.style.background = "url(img/location.png) -324px 0px no-repeat";
+					};
+					div.onmouseout = function(e) {
+						div.style.background = "url(img/location.png) -288px 0px no-repeat";
+					};
+					div.onclick = function(e) {
+						console.log('重新定位');
+						map.clearOverlays();
+						var p = new BMap.Point(parseFloat(NowLocation.SignLng), parseFloat(NowLocation.SignLat));
+						var marker = new BMap.Marker(p);
+						map.addOverlay(marker);
+						map.centerAndZoom(p, 17);
+					};
+					map.getContainer().appendChild(div);
+					return div;
+				}
+				var myLocationControl = new LocationControl();
+				map.addControl(myLocationControl);
+				$ionicLoading.show({
+					template: '正在加载中...'
+				});
+				ReaisService.GetSiteSign($scope.TaskId, $scope.SiteId, function(data) {
+					$ionicLoading.hide();
+					if (data.root[0].SignLng != "" && data.root[0].SignLat != "") {
+						$scope.checkintext = "重新签到";
+						point = new BMap.Point(parseFloat(data.root[0].SignLng), parseFloat(data.root[0].SignLat));
+						map.clearOverlays();
+						marker = new BMap.Marker(point);
+						map.addOverlay(marker);
+						map.centerAndZoom(point, 17);
+					} else {
+						point = new BMap.Point(parseFloat(NowLocation.SignLng), parseFloat(NowLocation.SignLat));
+						map.clearOverlays();
+						marker = new BMap.Marker(point);
+						map.addOverlay(marker);
+						map.centerAndZoom(point, 17);
+					}
+				}, function(data) {
+					$ionicLoading.hide();
+					network($ionicLoading, $ionicPopup);
+				});
+			}, 500);
+		}else{
+			ReaisService.GetSiteSign($scope.TaskId,$scope.SiteId,function(data){
 				if (data.root[0].SignLng != "" && data.root[0].SignLat != "") {
 					$scope.checkintext = "重新签到";
-					point = new BMap.Point(parseFloat(data.root[0].SignLng), parseFloat(data.root[0].SignLat));
-					map.clearOverlays();
-					marker = new BMap.Marker(point);
-					map.addOverlay(marker);
-					map.centerAndZoom(point, 17);
+					$scope.SignLng = data.root[0].SignLng;
+					$scope.SignLat = data.root[0].SignLat;
 				} else {
-					point = new BMap.Point(parseFloat(NowLocation.SignLng), parseFloat(NowLocation.SignLat));
-					map.clearOverlays();
-					marker = new BMap.Marker(point);
-					map.addOverlay(marker);
-					map.centerAndZoom(point, 17);
+					$scope.SignLng = NowLocation.SignLng;
+					$scope.SignLat = NowLocation.SignLat;
 				}
-			}).
-			error(function(data, status) {
-				$ionicLoading.hide();
+			},function(data){
 				network($ionicLoading, $ionicPopup);
 			});
-
-		}, 500);
-
-
-
+		}
 		$scope.checkin = function(e) {
 			$ionicLoading.show({
 				template: '正在加载中...'
 			});
-			$http.jsonp(WEB_HOST + "/Public/goSign.aspx?UserId=" + USER_ID + "&ProjectId=" + PROJECT_ID + "&TaskId=" + $scope.TaskId + "&SiteId=" + $scope.SiteId + "&SignLng=" + NowLocation.SignLng + "&SignLat=" + NowLocation.SignLat + "&Altitude=" + NowLocation.Altitude + "&jsoncallback=JSON_CALLBACK").
-			success(function(data, status) {
+			ReaisService.goSign($scope.TaskId, $scope.SiteId, NowLocation.SignLng, NowLocation.SignLat, NowLocation.Altitude, function(data) {
 				$ionicLoading.hide();
 				if (data.result.toLowerCase() == "ok") {
 					$ionicPopup.alert({
@@ -297,11 +311,14 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 						okText: "确定"
 					});
 				}
-			}).
-			error(function(data, status) {
+			}, function(data) {
 				$ionicLoading.hide();
 				network($ionicLoading, $ionicPopup);
 			});
+		}
+		$scope.reLocation = function(){
+			$scope.SignLng = NowLocation.SignLng;
+			$scope.SignLat = NowLocation.SignLat;
 		}
 	}),
 	surveyControllers.controller('InfotypesTabCtrl', function($scope, $http, $stateParams, $ionicHistory, $ionicLoading, $ionicPopup,ReaisService) {
@@ -399,6 +416,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 		$scope.PropertyID = $stateParams.PropertyID;
 		$scope.PropertylName = $stateParams.PropertylName;
 		$scope.IsPropertyGroup = $stateParams.IsPropertyGroup;
+		$scope.GroupPropertyID = $stateParams.GroupPropertyID;
 
 		//确定按钮事件
 		$scope.confirm = function(e) {
@@ -555,11 +573,17 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			$ionicLoading.show({
 				template: '正在加载中...'
 			});
-			ReaisService.TaskFormDataUpload($scope.TypeID, $scope.TaskId, $scope.SiteId, $scope.PropertyID, $scope.PropertylName, inputValue, function(data) {
+			ReaisService.TaskFormDataUpload($scope.TypeID, $scope.TaskId, $scope.SiteId, $scope.PropertyID, $scope.PropertylName, inputValue,$scope.IsPropertyGroup,$scope.GroupPropertyID,function(data) {
 				$ionicLoading.hide();
 				if (data.result.toLowerCase() == "ok") {
 					$ionicHistory.clearCache();
 					$ionicHistory.goBack();
+				}else{
+					$ionicPopup.alert({
+						title: '错误提示',
+						template: data.msg,
+						okText: "确定"
+					});
 				}
 			}, function(data) {
 				$ionicLoading.hide();
@@ -567,7 +591,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			});
 		};
 		//从后台获取表单类型
-		ReaisService.GetTaskPropertyControl($scope.TaskId,$scope.SiteId,$scope.TypeID,$scope.PropertyID,$scope.IsPropertyGroup,function(data){
+		ReaisService.GetTaskPropertyControl($scope.TaskId,$scope.SiteId,$scope.TypeID,$scope.PropertyID,0,function(data){
 			$scope.item = data.root[0];
 			$scope.data = {
 				clientSide: $scope.item.Defaults
@@ -1204,6 +1228,30 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 	}),
 	surveyControllers.controller('PeriodTabCtrl', function($scope, $stateParams, $http, $ionicHistory, $ionicLoading, $ionicPopup) {
 		console.log('PeriodTabCtrl');
+		if (!navigator.onLine) {
+			$ionicPopup.alert({
+				title: '错误提示',
+				template: '请在在线状态下使用往期数据功能!',
+				okText: "确定"
+			});
+			$ionicHistory.clearCache();
+			$ionicHistory.goBack();
+			return
+		}
+		var offline = window.LS.get("reais3_offline_" + USER_ID) == null ? {
+			checked: false
+		} : JSON.parse(window.LS.get("reais3_offline_" + USER_ID));
+
+		if (offline.checked) {
+			$ionicPopup.alert({
+				title: '错误提示',
+				template: '请在非离线状态下使用往期数据功能!',
+				okText: "确定"
+			});
+			$ionicHistory.clearCache();
+			$ionicHistory.goBack();
+			return
+		}
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.SiteId = $stateParams.SiteId;
 		$scope.displayHref = true;
@@ -1254,17 +1302,15 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('TalkTabCtrl', function($scope, $stateParams, $http, $ionicLoading, $ionicPopup) {
+	surveyControllers.controller('TalkTabCtrl', function($scope, $stateParams, $http, $ionicLoading, $ionicPopup,ReaisService) {
 		console.log('TalkTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.doWeixin = function(e) {
 			startMMUI();
 		}
-		$http.jsonp(HTTP_HOST + "/getTaskMemberList?&TaskId=" + $scope.TaskId + "&jsoncallback=JSON_CALLBACK").
-		success(function(data, status) {
+		ReaisService.getTaskMemberList($scope.TaskId,function(data){
 			$scope.items = data.root;
-		}).
-		error(function(data, status) {
+		},function(data){
 			network($ionicLoading, $ionicPopup);
 		});
 	});
