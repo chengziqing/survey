@@ -1,0 +1,16 @@
+<ion-modal-view>
+  <ion-header-bar class="bar bar-header bar-positive">
+    <h1 class="title">离线站点选择</h1>
+    <button class="button button-primary" ng-click="modalSite.myhide()">取消</button>
+    <button class="button button-primary" ng-click="modalSite.mysure()">确定</button>
+  </ion-header-bar>
+  <ion-content class="padding">
+	  <div ng-repeat="item in SelectItems">
+	     <div class="item item-divider" > 
+		    <b>{{item.TaskName}}</b> 
+		 </div>
+		 <ion-toggle ng-repeat="si in item.SiteInfo" ng-model="si.checked" ng-change="SiteChange(si)">{{si.ObjectName}}</ion-toggle>
+	  </div>
+
+  </ion-content>
+</ion-modal-view>

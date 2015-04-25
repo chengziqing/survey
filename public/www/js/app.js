@@ -10,8 +10,8 @@ var USER_ID="";
 var SITE_STSTUS="00";
 
 var NowLocation = {
-  SignLng: "117.212085",
-  SignLat: "31.856291",
+  SignLng: "",
+  SignLat: "",
   Altitude: "10"
 };
 var PROJECT_ID="";

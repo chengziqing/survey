@@ -18,8 +18,13 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			$state.go("tabs.already");
 		};
 	}),
-	surveyControllers.controller('SignInCtrl', function($scope, $state, $ionicPopup, $http, $ionicLoading, $ionicPopup,ReaisService) {
-		var account=window.LS.get("reais3_account")==null?{userId:"",username:"",password:"",isSave:false}:JSON.parse(window.LS.get("reais3_account"));
+	surveyControllers.controller('SignInCtrl', function($scope, $state, $ionicPopup, $http, $ionicLoading, $ionicPopup, ReaisService) {
+		var account = window.LS.get("reais3_account") == null ? {
+			userId: "",
+			username: "",
+			password: "",
+			isSave: false
+		} : JSON.parse(window.LS.get("reais3_account"));
 		$scope.user = account;
 		$scope.signIn = function(user) {
 			if (user.username == "") {
@@ -41,7 +46,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			$ionicLoading.show({
 				template: '正在加载中...'
 			});
-			ReaisService.GetUserInfo(user.username,user.password,user.isSave,function(data){
+			ReaisService.GetUserInfo(user.username, user.password, user.isSave, function(data) {
 				$ionicLoading.hide();
 				if (data.root.length == 0) {
 					$ionicPopup.alert({
@@ -53,33 +58,33 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 				}
 				var accountInfo = data.root[0];
 				USER_ID = accountInfo.UserId;
-				user.userId=USER_ID;
+				user.userId = USER_ID;
 				if (user.isSave) {
-					window.LS.set("reais3_account",JSON.stringify(user));
+					window.LS.set("reais3_account", JSON.stringify(user));
 				} else {
 					window.LS.remove("reais3_account");
 				}
 				$state.go('tabs.wait');
-			},function(data){
+			}, function(data) {
 				$ionicLoading.hide();
 				network($ionicLoading, $ionicPopup);
 			});
 		};
 
 	}),
-	surveyControllers.controller('WaitTabCtrl', function($scope, $http, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('WaitTabCtrl', function($scope, $http, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('WaitTabCtrl');
-		ReaisService.GetItemList("0",function(data){
+		ReaisService.GetItemList("0", function(data) {
 			$scope.items = data.root;
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('WorkingTabCtrl', function($scope, $http, $timeout, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('WorkingTabCtrl', function($scope, $http, $timeout, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('WorkingTabCtrl');
-		ReaisService.GetItemList("1",function(data){
+		ReaisService.GetItemList("1", function(data) {
 			$scope.items = data.root;
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
@@ -93,7 +98,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('AccountTabCtrl', function($scope, $http, $ionicModal, $state, $ionicLoading, $ionicPopup, $ionicHistory,ReaisService) {
+	surveyControllers.controller('AccountTabCtrl', function($scope, $http, $ionicModal, $state, $ionicLoading, $ionicPopup, $ionicHistory, ReaisService) {
 		console.log('AccountTabCtrl');
 		$ionicModal.fromTemplateUrl('templates/password.html', {
 			scope: $scope
@@ -135,31 +140,98 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 				});
 			}
 		});
-		$scope.exit = function() {
-			USER_ID = "";
-			$ionicHistory.clearHistory();
-			$state.go('signin');
-
-		}
-		$scope.offline=window.LS.get("reais3_offline_"+USER_ID)==null?{checked: false }:JSON.parse(window.LS.get("reais3_offline_"+USER_ID));
-		$scope.offlineChange=function(){
-			if (navigator.onLine) {
+		$ionicModal.fromTemplateUrl('templates/selectsite.html', {
+			scope: $scope
+		}).then(function(modal) {
+			$scope.modalSite = modal;
+			$scope.modalSite.myhide = function() {
+				$scope.offline.checked = false;
+				$scope.modalSite.hide();
+			}
+			$scope.modalSite.mysure = function() {
 				$ionicLoading.show({
-					template: '正在同步数据中...'
+					template: "正在下载数据中..."
 				});
-				ReaisService.DownloadOffLineData($scope.offline.checked,function(data){
+				ReaisService.DownloadOffLineData($scope.SelectItems,$scope.offline.checked,function(data){
 					$ionicLoading.hide();
 					if (data.result=="ok") {
-						console.log("切换成功");
+						$scope.modalSite.hide();
+						window.LS.set("reais3_offline_"+USER_ID, JSON.stringify($scope.offline));
 					}
 				},function(data){
 					$ionicLoading.hide();
 					if (data.result=="error") {
 						console.log("切换失败");
 					}
-				})
-				window.LS.set("reais3_offline_"+USER_ID, JSON.stringify($scope.offline));
-			}else{
+				});
+			}
+		});
+
+		$scope.SiteChange = function(obj) {
+			var n = 0;
+			for (var i = 0; i < $scope.SelectItems.length; i++) {
+				for (var k = 0; k < $scope.SelectItems[i].SiteInfo.length; k++) {
+					if ($scope.SelectItems[i].SiteInfo[k].checked) {
+						n++;
+					}
+				}
+			}
+			if (n > 8) {
+				obj.checked = false;
+				$ionicPopup.alert({
+					title: '提示信息',
+					template: "最多选择8个站点!",
+					okText: "确定"
+				});
+			}
+		}
+
+		$scope.exit = function() {
+			USER_ID = "";
+			$ionicHistory.clearHistory();
+			$state.go('signin');
+
+		}
+		$scope.offline = window.LS.get("reais3_offline_" + USER_ID) == null ? {
+			checked: false
+		} : JSON.parse(window.LS.get("reais3_offline_" + USER_ID));
+		$scope.offlineChange = function() {
+			if (navigator.onLine) {
+				if ($scope.offline.checked) {
+					ReaisService.SelectSite(function(data) {
+						$scope.SelectItems = data.root;
+					}, function(data) {});
+					$scope.modalSite.show();
+				} else {
+				var confirmPopup = $ionicPopup.confirm({
+					title: '确认信息',
+					template: '确定上传数据吗?',
+					cancelText: "取消",
+					okText: "确定"
+				});
+				confirmPopup.then(function(res) {
+					if (res) {
+						$ionicLoading.show({
+							template: "正在上传数据中..."
+						});
+						ReaisService.DownloadOffLineData($scope.SelectItems, $scope.offline.checked, function(data) {
+							$ionicLoading.hide();
+							if (data.result == "ok") {
+								$scope.modalSite.hide();
+								window.LS.set("reais3_offline_" + USER_ID, JSON.stringify($scope.offline));
+							}
+						}, function(data) {
+							$ionicLoading.hide();
+							if (data.result == "error") {
+								console.log("切换失败");
+							}
+						});
+					} else {
+						$scope.offline.checked = true;
+					}
+				});
+				}
+			} else {
 				$ionicPopup.alert({
 					title: '提示信息',
 					template: "请在在线状态下切换模式!",
@@ -170,7 +242,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			}
 		}
 	}),
-	surveyControllers.controller('StationTabCtrl', function($scope, $http, $stateParams, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('StationTabCtrl', function($scope, $http, $stateParams, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('StationTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.ProjectId = $stateParams.ProjectId;
@@ -178,13 +250,13 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 		$scope.setSiteState = function(e) {
 			SITE_STSTUS = e.Status;
 		}
-		ReaisService.GetItemSiteList($scope.TaskId,function(data){
+		ReaisService.GetItemSiteList($scope.TaskId, function(data) {
 			$scope.items = data.root;
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('ContentTabCtrl', function($scope, $http, $stateParams, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('ContentTabCtrl', function($scope, $http, $stateParams, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('ContentTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.SiteId = $stateParams.SiteId;
@@ -196,13 +268,13 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 				okText: "确定"
 			});
 		}
-		ReaisService.GetSiteAllStatus($scope.TaskId,$scope.SiteId,function(data){
+		ReaisService.GetSiteAllStatus($scope.TaskId, $scope.SiteId, function(data) {
 			$scope.item = data.root[0];
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('CheckinTabCtrl', function($scope, $stateParams, $http, $timeout, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('CheckinTabCtrl', function($scope, $stateParams, $http, $timeout, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('CheckinTabCtrl');
 		$scope.checkintext = "开始签到";
 		$scope.TaskId = $stateParams.TaskId;
@@ -277,8 +349,8 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 					network($ionicLoading, $ionicPopup);
 				});
 			}, 500);
-		}else{
-			ReaisService.GetSiteSign($scope.TaskId,$scope.SiteId,function(data){
+		} else {
+			ReaisService.GetSiteSign($scope.TaskId, $scope.SiteId, function(data) {
 				if (data.root[0].SignLng != "" && data.root[0].SignLat != "") {
 					$scope.checkintext = "重新签到";
 					$scope.SignLng = data.root[0].SignLng;
@@ -287,7 +359,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 					$scope.SignLng = NowLocation.SignLng;
 					$scope.SignLat = NowLocation.SignLat;
 				}
-			},function(data){
+			}, function(data) {
 				network($ionicLoading, $ionicPopup);
 			});
 		}
@@ -295,6 +367,14 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			$ionicLoading.show({
 				template: '正在加载中...'
 			});
+			if (NowLocation.SignLng == "" || NowLocation.SignLat == "") {
+				$ionicPopup.alert({
+					title: '提示信息',
+					template: "坐标未获取,稍后重试!",
+					okText: "确定"
+				});
+				return 
+			}
 			ReaisService.goSign($scope.TaskId, $scope.SiteId, NowLocation.SignLng, NowLocation.SignLat, NowLocation.Altitude, function(data) {
 				$ionicLoading.hide();
 				if (data.result.toLowerCase() == "ok") {
@@ -316,12 +396,12 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 				network($ionicLoading, $ionicPopup);
 			});
 		}
-		$scope.reLocation = function(){
+		$scope.reLocation = function() {
 			$scope.SignLng = NowLocation.SignLng;
 			$scope.SignLat = NowLocation.SignLat;
 		}
 	}),
-	surveyControllers.controller('InfotypesTabCtrl', function($scope, $http, $stateParams, $ionicHistory, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('InfotypesTabCtrl', function($scope, $http, $stateParams, $ionicHistory, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('InfotypesTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.SiteId = $stateParams.SiteId;
@@ -364,13 +444,13 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 				}
 			});
 		}
-		ReaisService.GetTaskInfoTypes($scope.TaskId,$scope.SiteId,function(data){
+		ReaisService.GetTaskInfoTypes($scope.TaskId, $scope.SiteId, function(data) {
 			$scope.items = data.root;
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('FormTabCtrl', function($scope, $http, $stateParams, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('FormTabCtrl', function($scope, $http, $stateParams, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('FormTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.SiteId = $stateParams.SiteId;
@@ -380,13 +460,13 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 		if (SITE_STSTUS.length > 1 && SITE_STSTUS.substring(1, 2) == "2") {
 			$scope.displayHref = false;
 		}
-		ReaisService.GetTaskPropertys($scope.TaskId,$scope.SiteId,$scope.TypeID,function(data){
+		ReaisService.GetTaskPropertys($scope.TaskId, $scope.SiteId, $scope.TypeID, function(data) {
 			$scope.items = data.root;
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('GroupFormTabCtrl', function($scope, $http, $stateParams, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('GroupFormTabCtrl', function($scope, $http, $stateParams, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('GroupFormTabCtrl');
 
 		$scope.TaskId = $stateParams.TaskId;
@@ -406,7 +486,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			network($ionicLoading, $ionicPopup);
 		})
 	}),
-	surveyControllers.controller('BaseFormTabCtrl', function($scope, $http, $stateParams, $ionicHistory, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('BaseFormTabCtrl', function($scope, $http, $stateParams, $ionicHistory, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('BaseFormTabCtrl');
 		$scope.title = $stateParams.PropertylName;
 
@@ -573,12 +653,12 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			$ionicLoading.show({
 				template: '正在加载中...'
 			});
-			ReaisService.TaskFormDataUpload($scope.TypeID, $scope.TaskId, $scope.SiteId, $scope.PropertyID, $scope.PropertylName, inputValue,$scope.IsPropertyGroup,$scope.GroupPropertyID,function(data) {
+			ReaisService.TaskFormDataUpload($scope.TypeID, $scope.TaskId, $scope.SiteId, $scope.PropertyID, $scope.PropertylName, inputValue, $scope.IsPropertyGroup, $scope.GroupPropertyID, function(data) {
 				$ionicLoading.hide();
 				if (data.result.toLowerCase() == "ok") {
 					$ionicHistory.clearCache();
 					$ionicHistory.goBack();
-				}else{
+				} else {
 					$ionicPopup.alert({
 						title: '错误提示',
 						template: data.msg,
@@ -591,7 +671,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			});
 		};
 		//从后台获取表单类型
-		ReaisService.GetTaskPropertyControl($scope.TaskId,$scope.SiteId,$scope.TypeID,$scope.PropertyID,0,function(data){
+		ReaisService.GetTaskPropertyControl($scope.TaskId, $scope.SiteId, $scope.TypeID, $scope.PropertyID, 0, function(data) {
 			$scope.item = data.root[0];
 			$scope.data = {
 				clientSide: $scope.item.Defaults
@@ -636,22 +716,22 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 				}
 				$scope.checkboxs = checkboxs;
 			}
-		
-		},function(data){
+
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('ImagetypesTabCtrl', function($scope, $stateParams, $http, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('ImagetypesTabCtrl', function($scope, $stateParams, $http, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('ImagetypesTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.SiteId = $stateParams.SiteId;
-		ReaisService.getSiteDirectory($scope.TaskId,$scope.SiteId,function(data){
+		ReaisService.getSiteDirectory($scope.TaskId, $scope.SiteId, function(data) {
 			$scope.items = data.root;
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('ImageupTabCtrl', function($scope, $stateParams, $http, $ionicModal, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('ImageupTabCtrl', function($scope, $stateParams, $http, $ionicModal, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('ImageupTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.SiteId = $stateParams.SiteId;
@@ -680,9 +760,9 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			}
 			return false;
 		};
-		ReaisService.getSitePicName($scope.TaskId,$scope.SiteId,$scope.DirectoryID,"0",function(data){
+		ReaisService.getSitePicName($scope.TaskId, $scope.SiteId, $scope.DirectoryID, "0", function(data) {
 			$scope.items = data.root;
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 		$ionicModal.fromTemplateUrl('templates/imageupmodal.html?9', {
@@ -873,7 +953,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 					$ionicLoading.show({
 						template: '正在加载中...'
 					});
-					ReaisService.DelPicture($scope.TaskId,$scope.SiteId,$scope.DirectoryID,e.PicId,function(data){
+					ReaisService.DelPicture($scope.TaskId, $scope.SiteId, $scope.DirectoryID, e.PicId, function(data) {
 						$ionicLoading.hide();
 						if (data.result.toLowerCase() == "ok") {
 							$ionicPopup.alert({
@@ -887,7 +967,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 								//
 							});
 						}
-					},function(error){
+					}, function(error) {
 						$ionicPopup.alert({
 							title: '失败提示',
 							template: data.msg,
@@ -912,14 +992,14 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			// build items array
 			var items = new Array();
 			var showIndex = 0;
-			var newItems =new Array();
+			var newItems = new Array();
 
 			for (var i = 0; i < $scope.items.length; i++) {
 				if (!navigator.onLine) {
 					if ($scope.items[i].PicPath.indexOf("file:") != -1 && $scope.items[i].PicPath != "") {
 						newItems.push($scope.items[i]);
 					}
-				}else{
+				} else {
 					if ($scope.items[i].PicPath != "") {
 						newItems.push($scope.items[i]);
 					}
@@ -936,9 +1016,9 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 						h: newItems[i].h
 					}
 					items.push(image);
-				}else{
+				} else {
 					var image = {
-						src: WEB_HOST +newItems[i].PicPath,
+						src: WEB_HOST + newItems[i].PicPath,
 						w: newItems[i].w,
 						h: newItems[i].h
 					}
@@ -963,7 +1043,7 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			}
 		}
 	}),
-	surveyControllers.controller('ImagelistTabCtrl', function($scope, $stateParams, $http, $ionicModal, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('ImagelistTabCtrl', function($scope, $stateParams, $http, $ionicModal, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('ImagelistTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.SiteId = $stateParams.SiteId;
@@ -1195,8 +1275,8 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 							h: $scope.items[i].h
 						}
 						items.push(image);
-					}else{
-						if (navigator.onLine){
+					} else {
+						if (navigator.onLine) {
 							var image = {
 								src: WEB_HOST + $scope.items[i].PicPath,
 								w: $scope.items[i].w,
@@ -1302,15 +1382,15 @@ surveyControllers.controller('NavBarCtrl', function($scope, $ionicHistory) {
 			network($ionicLoading, $ionicPopup);
 		});
 	}),
-	surveyControllers.controller('TalkTabCtrl', function($scope, $stateParams, $http, $ionicLoading, $ionicPopup,ReaisService) {
+	surveyControllers.controller('TalkTabCtrl', function($scope, $stateParams, $http, $ionicLoading, $ionicPopup, ReaisService) {
 		console.log('TalkTabCtrl');
 		$scope.TaskId = $stateParams.TaskId;
 		$scope.doWeixin = function(e) {
 			startMMUI();
 		}
-		ReaisService.getTaskMemberList($scope.TaskId,function(data){
+		ReaisService.getTaskMemberList($scope.TaskId, function(data) {
 			$scope.items = data.root;
-		},function(data){
+		}, function(data) {
 			network($ionicLoading, $ionicPopup);
 		});
 	});

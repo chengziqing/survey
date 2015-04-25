@@ -1,10 +1,10 @@
 //外网
-var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
-var WEB_HOST = "http://www.share-net.cn:8081";
+//var HTTP_HOST="http://www.share-net.cn:8082/ReaisService.asmx";
+//var WEB_HOST = "http://www.share-net.cn:8081";
 
 //内网
-//var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
-//var WEB_HOST = "http://192.168.1.32:8081";
+var HTTP_HOST = "http://192.168.1.32:8082/ReaisService.asmx";
+var WEB_HOST = "http://192.168.1.32:8081";
 
 var USER_ID="";
 var SITE_STSTUS="00";
@@ -339,3 +339,62 @@ var network = function($ionicLoading, $ionicPopup) {
 		okText: "确定"
 	});
 }
+
+//图片下载处理Begin
+//1、图片路径本地存储处理
+var pushPicData = function(obj) {
+	var data = JSON.parse(window.LS.get("reais3_getSitePicName_" + USER_ID + "_" + obj.TaskId + "_" + obj.SiteId + "_" + obj.DirectoryID));
+	for (var i = 0; i < data.root.length; i++) {
+		if (data.root[i].PicId == obj.PicId) {
+			data.root[i] = obj;
+			break;
+		}
+	}
+	window.LS.set("reais3_getSitePicName_" + USER_ID + "_" + obj.TaskId + "_" + obj.SiteId + "_" + obj.DirectoryID, JSON.stringify(data));
+	//console.log("+++++++++++++"+JSON.stringify(data));
+}
+//2、图片下载整个过程。
+var downloadPic = function(data) {
+	for (var j = 0; j < data.root.length; j++) {
+		if (data.root[j].PicPath != "") {
+			window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {           
+				var imageurl = data.root[j].PicPath; //文件远程路径
+				var filename = imageurl.substring(imageurl.lastIndexOf('/') + 1); //文件名称带aa.jpg?t=xxxx
+				var _imagename = filename.substring(0, filename.lastIndexOf('?'));//图片名称aa.jpg
+				var _filepath = "com.share-net.cn/" + data.root[j].TaskId +
+					"/" + data.root[j].SiteId +
+					"/" + data.root[j].DirectoryName + "/" + _imagename;      //保存本地相对路径
+				var _localFile = fileSystem.root.fullPath + "/" + _filepath;  //保存本地绝对路径
+
+				(function(newdata,n) {
+
+					fileSystem.root.getFile(_filepath, null, function(fileEntry) {
+						newdata.PicPath = fileEntry.fullPath;
+						newdata.SmallPicPath = fileEntry.fullPath;
+						//console.log("======found file:" + JSON.stringify(newdata));
+						pushPicData(newdata);
+					},function(){
+						//console.log("=========file not found=====")
+						var fileTransfer = new FileTransfer();
+						window.LS.set("reais3_getSitePicName_" + USER_ID + "_" + newdata.TaskId + "_" + newdata.SiteId + "_" + newdata.DirectoryID + "_" + n, "0");
+						fileTransfer.download(encodeURI(WEB_HOST + imageurl), _localFile, function(entry) {
+							newdata.PicPath = entry.fullPath;
+							newdata.SmallPicPath = entry.fullPath;
+							pushPicData(newdata);
+
+						}, function(error) {
+							//alert("Some error");   
+						});
+
+					});
+
+				})(data.root[j],j);
+
+			}, function(evt) {
+				console.log("加载文件系统出现错误");
+			});
+		}
+
+	}
+}
+//图片下载处理End
